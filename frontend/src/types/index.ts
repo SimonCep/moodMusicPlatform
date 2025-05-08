@@ -72,6 +72,8 @@ export interface Mood {
     name: string;
     created_at: string;
     tracks: Track[];
+    llm_fallback_count?: number;
+    total_tracks_generated?: number;
   }
   
   export interface MoodPlaylistResponse {

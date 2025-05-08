@@ -11,13 +11,16 @@ import {
 
 import { PlusCircle, Save, Ban as CancelIcon, Edit3 as ReorderIcon } from 'lucide-react';
 import { toast } from 'sonner';
-import { Track, Playlist } from '../types';
+import { Track, Playlist } from '../types'; // Ensure Track & Playlist types are correctly imported/defined
 import { usePlaylistsData } from '../features/playlists/hooks/usePlaylistsData';
 import { useTrackPreview, TrackPreviewStates } from '../features/playlists/hooks/useTrackPreview';
 import { formatPlaylistDate } from '../features/playlists/utils/dateUtils';
 import AddSongDialog from '../features/playlists/components/AddSongDialog';
 import PlaylistTracksTable from '../features/playlists/components/PlaylistTracksTable';
 import { replacePlaylistTrack } from '../services/api';
+
+
+const revisedDisclaimerText = "Song suggestions for niche or highly regional genres may sometimes be inaccurate or difficult to verify. We do our best, but some tracks in this playlist might not exist due to the complexity of the LLM's suggestions. For more consistently verifiable results, try using broader genre terms or selecting more mainstream music styles.";
 
 const PlaylistsPage: React.FC = () => {
   const {
@@ -80,7 +83,7 @@ const PlaylistsPage: React.FC = () => {
       setTrackPreviewStates((prev: TrackPreviewStates) => {
         const newState = { ...prev };
         if (newState[playlistId]) {
-          newState[playlistId][trackId] = { uri: null, loading: false }; 
+          delete newState[playlistId][trackId];
         }
         return newState;
       });
@@ -90,7 +93,7 @@ const PlaylistsPage: React.FC = () => {
       });
       handleCloseFeedbackPopup();
     } catch (error: any) {
-      console.error("Failed to replace track:", error);
+      // console.error removed
       toast.error(`Failed to replace "${originalTitle}"`, {
         id: toastId,
         description: error.response?.data?.detail || error.message || "Please try again later."
@@ -125,6 +128,14 @@ const PlaylistsPage: React.FC = () => {
                   ? playlistTracksBeingReordered 
                   : playlist.tracks;
 
+                // Removed debug logs
+
+                const showDisclaimer = playlist.total_tracks_generated != null && playlist.llm_fallback_count != null &&
+                                     playlist.total_tracks_generated > 0 && 
+                                     playlist.llm_fallback_count > playlist.total_tracks_generated / 2;
+
+                // Removed debug logs
+
                 return (
                   <AccordionItem value={`item-${index}`} key={currentPlaylistIdStr} className="mb-2 border-b-0 rounded-lg overflow-hidden shadow-md bg-black/5 backdrop-blur-md border border-white/10">
                     <AccordionTrigger className="text-left hover:no-underline px-6 py-4 data-[state=open]:bg-primary/10 group">
@@ -139,7 +150,7 @@ const PlaylistsPage: React.FC = () => {
                           {!isReorderModeForThisPlaylist && (
                             <Button
                               variant="ghost" size="icon"
-                              onClick={(e) => { e.stopPropagation(); openAddSongDialogFromHook(currentPlaylistIdStr); }}
+                              onClick={(e: React.MouseEvent) => { e.stopPropagation(); openAddSongDialogFromHook(currentPlaylistIdStr); }} // Typed 'e'
                               className="text-primary hover:text-primary/80"
                               aria-label="Add song to playlist"
                             >
@@ -150,7 +161,7 @@ const PlaylistsPage: React.FC = () => {
                             <>
                               <Button
                                 variant="outline" size="icon"
-                                onClick={(e) => { e.stopPropagation(); handleSaveReorderedTracks(); }}
+                                onClick={(e: React.MouseEvent) => { e.stopPropagation(); handleSaveReorderedTracks(); }} // Typed 'e'
                                 className="text-green-500 border-green-500 hover:bg-green-500/10 hover:text-green-600"
                                 title="Save Order"
                               >
@@ -158,7 +169,7 @@ const PlaylistsPage: React.FC = () => {
                               </Button>
                               <Button
                                 variant="ghost" size="icon"
-                                onClick={(e) => { e.stopPropagation(); cancelReorder(currentPlaylistIdStr); }}
+                                onClick={(e: React.MouseEvent) => { e.stopPropagation(); cancelReorder(currentPlaylistIdStr); }} // Typed 'e'
                                 className="text-destructive hover:text-destructive/80"
                                 title="Cancel Reorder"
                               >
@@ -168,7 +179,7 @@ const PlaylistsPage: React.FC = () => {
                           ) : (
                             <Button
                               variant="ghost" size="icon"
-                              onClick={(e) => { e.stopPropagation(); handleToggleReorderMode(currentPlaylistIdStr); }}
+                              onClick={(e: React.MouseEvent) => { e.stopPropagation(); handleToggleReorderMode(currentPlaylistIdStr); }} // Typed 'e'
                               className="text-blue-500 hover:text-blue-600"
                               title="Reorder Playlist"
                             >
@@ -179,6 +190,12 @@ const PlaylistsPage: React.FC = () => {
                       </div>
                     </AccordionTrigger>
                     <AccordionContent className="px-2 pb-4 pt-0 sm:px-4 md:px-6">
+                      {showDisclaimer && (
+                        <div className="my-3 p-3 bg-yellow-50 border-l-4 border-yellow-400 text-yellow-700 text-sm rounded-md">
+                          <p><span className="font-semibold">Please Note:</span> {revisedDisclaimerText}</p>
+                        </div>
+                      )}
+
                       {playlist.tracks && playlist.tracks.length > 0 ? (
                         <PlaylistTracksTable
                           playlist={playlist}
@@ -219,7 +236,7 @@ const PlaylistsPage: React.FC = () => {
 
       <AddSongDialog 
         open={showAddSongDialog}
-        onOpenChange={(isOpen) => !isOpen && closeAddSongDialog()}
+        onOpenChange={(isOpen: boolean) => !isOpen && closeAddSongDialog()} // Typed 'isOpen'
         title={addSongTitle}
         onTitleChange={setAddSongTitle}
         artist={addSongArtist}

@@ -7,3 +7,5 @@ requests
 openai
 djangorestframework-simplejwt
 python-dotenv
+spotipy
+geoip2>=4.1.0

@@ -25,6 +25,8 @@ class Playlist(models.Model):
     name = models.CharField(max_length=200, default="My Mood Playlist")
     created_at = models.DateTimeField(default=timezone.now)
     prompt_used = models.TextField()
+    llm_fallback_count = models.IntegerField(default=0)     # New field: count of tracks not found on Spotify
+    total_tracks_generated = models.IntegerField(default=0) # New field: total tracks initially generated
     
     def __str__(self):
         return f"{self.name} (User: {self.mood.user.username}) - {self.created_at.strftime('%Y-%m-%d %H:%M')}"

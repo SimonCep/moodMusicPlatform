@@ -19,7 +19,7 @@ class PlaylistSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = Playlist
-        fields = ['id', 'name', 'created_at', 'tracks']
+        fields = ['id', 'name', 'created_at', 'tracks', 'llm_fallback_count', 'total_tracks_generated']
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:

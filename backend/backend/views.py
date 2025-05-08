@@ -19,9 +19,30 @@ from django.shortcuts import get_object_or_404
 from django.db import transaction
 import logging
 from rest_framework.views import APIView
+import spotipy
+from spotipy.oauth2 import SpotifyClientCredentials
+import geoip2.database
+from geoip2.errors import AddressNotFoundError
+
+logger = logging.getLogger(__name__) # Define logger early
+
+# --- Globals / Constants ---
+# It's better to initialize the GeoIP reader once when the app starts,
+# but for simplicity in this example, we might open it in the view.
+# A more robust solution would use Django settings for the path.
+GEOIP_DATABASE_PATH = '/app/geoip_data/GeoLite2-Country.mmdb' # Update this path if needed
+geoip_reader = None
+try:
+    # Attempt to load the GeoIP database when the module is loaded.
+    # Ensure the database file is present at GEOIP_DATABASE_PATH inside your container.
+    geoip_reader = geoip2.database.Reader(GEOIP_DATABASE_PATH)
+except FileNotFoundError:
+    logger.warning(f"GeoIP2 database not found at {GEOIP_DATABASE_PATH}. IP-based market detection will be disabled.")
+except Exception as e:
+    logger.error(f"Error loading GeoIP2 database: {e}", exc_info=True)
 
 client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
-logger = logging.getLogger(__name__) # Define logger once at module level
+# logger = logging.getLogger(__name__) # No longer needed here, moved up
 
 MOOD_CATEGORIES_LIST = [
     "Happy", "Sad", "Angry", "Calm", "Excited", "Anxious", 
@@ -86,6 +107,45 @@ def create_mood_and_playlist(request):
     mood_category = get_mood_category_from_openai(text_for_mood_tracking)
     logger.info(f"Using text for categorization: '{text_for_mood_tracking}'. Categorized as: {mood_category}")
 
+    market_code_for_spotify = None
+    # 1. Try to determine market code from favorite_genre keywords
+    if favorite_genre and isinstance(favorite_genre, str):
+        genre_lower = favorite_genre.lower()
+        if "lithuanian" in genre_lower:
+            market_code_for_spotify = "LT"
+        elif "polish" in genre_lower:
+            market_code_for_spotify = "PL"
+        elif "japanese" in genre_lower or "j-pop" in genre_lower or "j-rock" in genre_lower:
+            market_code_for_spotify = "JP"
+        # Add more genre-to-market mappings as needed
+
+    # 2. If not found from genre, try to determine from user's IP address
+    if not market_code_for_spotify and geoip_reader:
+        try:
+            # Get client IP address
+            x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+            if x_forwarded_for:
+                ip_address = x_forwarded_for.split(',')[0].strip()
+            else:
+                ip_address = request.META.get('REMOTE_ADDR')
+            
+            if ip_address:
+                logger.info(f"Attempting GeoIP lookup for IP: {ip_address}")
+                response = geoip_reader.country(ip_address)
+                market_code_for_spotify = response.country.iso_code
+                logger.info(f"GeoIP lookup successful: IP {ip_address} mapped to market {market_code_for_spotify}")
+            else:
+                logger.warning("Could not determine client IP address for GeoIP lookup.")
+        except AddressNotFoundError:
+            logger.warning(f"IP address {ip_address} not found in GeoIP database.")
+        except Exception as e:
+            logger.error(f"Error during GeoIP lookup for IP {ip_address}: {e}", exc_info=True)
+    
+    if market_code_for_spotify:
+        logger.info(f"Using market code for Spotify: {market_code_for_spotify}")
+    else:
+        logger.info("No specific market code determined for Spotify. Using Spotify's default.")
+
     current_month = datetime.now().month
     if 3 <= current_month <= 5:
         season = 'Spring'
@@ -133,6 +193,14 @@ def create_mood_and_playlist(request):
         f"and they prefer {favorite_genre} music. "
     ]
 
+    # Refine prompt for regional music
+    if market_code_for_spotify: # If a specific market is identified
+        prompt_parts.append(
+            f"The user has indicated a preference for music from the region associated with market code '{market_code_for_spotify}'. "
+            f"Please prioritize songs that are verifiably available on major streaming platforms within this market. "
+            f"If possible, lean towards more recognizable tracks from this region to increase verification chances. "
+        )
+
     if playlist_goal:
         prompt_parts.append(f"The goal for this playlist is: '{playlist_goal}'. ")
 
@@ -141,6 +209,7 @@ def create_mood_and_playlist(request):
         f"1. 'playlist_name': A short, creative title for the playlist (max 5 words). ",
         f"2. 'tracks': A JSON array of exactly {song_count} songs. ",
         f"Each song in the array must have 'title', 'artist', and 'duration' fields. ",
+        f"For each track, please provide the most common and verifiable spelling for the title and artist. If suggesting regional or less common music, prioritize tracks that are likely to be found on major streaming platforms. ",
         f"Make sure the songs match the mood, category, time of day, energy level, and playlist goal if provided."
     ])
     
@@ -152,28 +221,85 @@ def create_mood_and_playlist(request):
         playlist_name = playlist_data.get('playlist_name', f"Mood Playlist ({text_for_mood_tracking[:20]}...)") 
         tracks_data = playlist_data.get('tracks', []) 
 
+        # Process tracks first to determine fallback status
+        processed_tracks_data = []
+        verified_on_spotify_count = 0
+        llm_fallback_count = 0
+
+        for i, track_data_from_llm in enumerate(tracks_data):
+            original_title = track_data_from_llm.get('title', 'Unknown Title')
+            original_artist = track_data_from_llm.get('artist', 'Unknown Artist')
+            original_duration = track_data_from_llm.get('duration')
+
+            spotify_track_details = _search_spotify_for_track_details(
+                title=original_title, 
+                artist=original_artist, 
+                market_code=market_code_for_spotify
+            )
+
+            track_info_to_save = {
+                'title': original_title,
+                'artist': original_artist,
+                'album': None,
+                'duration': original_duration,
+                'spotify_uri': None,
+                'order_in_playlist': i
+            }
+
+            if spotify_track_details:
+                logger.info(f"Successfully found Spotify details for: {original_title} - {original_artist}")
+                track_info_to_save['title'] = spotify_track_details['title']
+                track_info_to_save['artist'] = spotify_track_details['artist']
+                track_info_to_save['album'] = spotify_track_details['album']
+                track_info_to_save['duration'] = spotify_track_details['duration']
+                track_info_to_save['spotify_uri'] = spotify_track_details['spotify_uri']
+                verified_on_spotify_count += 1
+            else:
+                logger.warning(f"Could not find Spotify details for: {original_title} - {original_artist}. Using LLM provided data.")
+                llm_fallback_count += 1
+                # Attempt to parse/normalize LLM duration
+                if track_info_to_save['duration'] and isinstance(track_info_to_save['duration'], str) and ':' not in track_info_to_save['duration']:
+                    try:
+                        total_seconds = int(track_info_to_save['duration'])
+                        minutes = total_seconds // 60
+                        seconds = total_seconds % 60
+                        track_info_to_save['duration'] = f"{minutes}:{seconds:02d}"
+                    except ValueError:
+                        logger.warning(f"Could not parse LLM duration '{track_info_to_save['duration']}' for '{original_title}'. Leaving as null.")
+                        track_info_to_save['duration'] = None
+            
+            processed_tracks_data.append(track_info_to_save)
+
+        # Now create the Playlist instance with the final counts
+        total_tracks_count = len(processed_tracks_data)
         playlist_instance = Playlist.objects.create(
             mood=mood_instance, 
             prompt_used=prompt, 
-            name=playlist_name 
+            name=playlist_name,
+            llm_fallback_count=llm_fallback_count,
+            total_tracks_generated=total_tracks_count
         )
         
-        created_tracks = []
-        for i, track_data in enumerate(tracks_data):
+        # Now create the Track instances linked to the playlist
+        created_tracks_instances = []
+        for track_info in processed_tracks_data:
             track = Track.objects.create(
                 playlist=playlist_instance,
-                title=track_data.get('title', 'Unknown Title'),
-                artist=track_data.get('artist', 'Unknown Artist'),
-                duration=track_data.get('duration')
+                title=track_info['title'],
+                artist=track_info['artist'],
+                album=track_info['album'],
+                duration=track_info['duration'],
+                spotify_uri=track_info['spotify_uri'],
+                order_in_playlist=track_info['order_in_playlist']
             )
-            created_tracks.append(track)
+            created_tracks_instances.append(track)
 
         mood_serializer = MoodSerializer(mood_instance) 
         playlist_serializer = PlaylistSerializer(playlist_instance) 
         
         response_data = {
             'mood': mood_serializer.data,
-            'playlist': playlist_serializer.data
+            'playlist': playlist_serializer.data,
         }
 
         return Response(response_data, status=status.HTTP_201_CREATED)
@@ -339,9 +465,9 @@ def replace_track_view(request, playlist_pk, track_pk):
     )
 
     # Reverting to print statements due to persistent SyntaxError
-    print("--- Replacement Prompt ---")
-    print(prompt)
-    print("--------------------------")
+    logger.debug("--- Replacement Prompt ---")
+    logger.debug(prompt)
+    logger.debug("--------------------------")
 
     new_track_data = call_openai_for_replacement(prompt)
 
@@ -474,16 +600,77 @@ def reorder_playlist_tracks(request, playlist_pk):
         return Response(updated_playlist_data, status=status.HTTP_200_OK)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-def _search_spotify_for_track_details(title: str, artist: str):
-    # Placeholder function
-    logger.info(f"Placeholder Spotify search for: {title} - {artist}")
-    return {
-        "title": title,
-        "artist": artist,
-        "album": "Unknown Album (Spotify)",
-        "duration_ms": 180000, 
-        "spotify_uri": f"spotify:track:placeholder_{title.replace(' ', '_')}"
-    }
+def _search_spotify_for_track_details(title: str, artist: str, market_code: str | None = None):
+    """
+    Searches Spotify for a track by title and artist, optionally for a specific market.
+    Returns a dictionary with track details if found, otherwise None.
+    """
+    client_id = os.environ.get('SPOTIPY_CLIENT_ID')
+    client_secret = os.environ.get('SPOTIPY_CLIENT_SECRET')
+
+    if not client_id or not client_secret:
+        logger.error("Spotify API credentials (SPOTIPY_CLIENT_ID, SPOTIPY_CLIENT_SECRET) not found in environment variables.")
+        return None
+
+    try:
+        client_credentials_manager = SpotifyClientCredentials(client_id=client_id, client_secret=client_secret)
+        sp = spotipy.Spotify(client_credentials_manager=client_credentials_manager)
+
+        query = f"track:{title} artist:{artist}"
+        logger.info(f"Searching Spotify with query: '{query}', market: '{market_code if market_code else 'None (default behavior)'}'")
+        results = sp.search(q=query, type='track', limit=1, market=market_code) # Use dynamic market_code
+
+        if results and results['tracks']['items']:
+            track_item = results['tracks']['items'][0]
+            
+            duration_ms = track_item.get('duration_ms', 0)
+            duration_seconds = duration_ms // 1000
+            # Corrected duration formatting to avoid issues like 01:05 vs 1:05
+            minutes = duration_seconds // 60
+            seconds = duration_seconds % 60
+            duration_formatted = f"{minutes}:{seconds:02d}"
+
+            return {
+                "title": track_item['name'],
+                "artist": ", ".join([a['name'] for a in track_item['artists']]),
+                "album": track_item['album']['name'],
+                "duration_ms": duration_ms, # Keep ms for potential future use
+                "duration": duration_formatted, # Formatted for display
+                "spotify_uri": track_item.get('uri')
+            }
+        else:
+            logger.warning(f"Spotify search: No results found for title='{title}', artist='{artist}' with market '{market_code}'")
+            # Fallback: attempt search with just title if artist search fails or is too specific
+            logger.info(f"Attempting Spotify search with title only: '{title}' with market '{market_code}'")
+            results_title_only = sp.search(q=f"track:{title}", type='track', limit=5, market=market_code)
+            if results_title_only and results_title_only['tracks']['items']:
+                # Basic attempt to match artist if multiple results
+                for item in results_title_only['tracks']['items']:
+                    spotify_artists = [a['name'].lower() for a in item['artists']]
+                    if artist.lower() in spotify_artists or any(artist.lower() in s_artist for s_artist in spotify_artists):
+                        track_item = item # Found a plausible match
+                        duration_ms = track_item.get('duration_ms', 0)
+                        duration_seconds = duration_ms // 1000
+                        minutes = duration_seconds // 60
+                        seconds = duration_seconds % 60
+                        duration_formatted = f"{minutes}:{seconds:02d}"
+                        logger.info(f"Found fallback match for '{title}' by '{artist}' -> '{track_item['name']}' by '{', '.join([a['name'] for a in track_item['artists']])}' with market '{market_code}'")    
+                        return {
+                            "title": track_item['name'],
+                            "artist": ", ".join([a['name'] for a in track_item['artists']]),
+                            "album": track_item['album']['name'],
+                            "duration_ms": duration_ms,
+                            "duration": duration_formatted,
+                            "spotify_uri": track_item.get('uri')
+                        }
+            logger.warning(f"Spotify search (title only fallback): Still no results for title='{title}' with market '{market_code}'")
+            return None
+    except spotipy.SpotifyException as se:
+        logger.error(f"Spotify API error for title='{title}', artist='{artist}', market='{market_code}': {str(se)}. Status: {se.http_status}, Reason: {se.msg}")
+        return None
+    except Exception as e:
+        logger.error(f"General Spotify search error for title='{title}', artist='{artist}': {str(e)}", exc_info=True)
+        return None
 
 @api_view(['POST'])
 @permission_classes([permissions.IsAuthenticated])
