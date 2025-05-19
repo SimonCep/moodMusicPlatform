@@ -23,23 +23,53 @@ A personalized music recommendation platform that suggests music based on user m
 
 ```
 moodMusicPlatform/
-├── backend/             # Django backend
-│   ├── backend/        # Main Django app
-│   ├── templates/      # Django templates
-│   ├── manage.py      # Django management script
-│   └── requirements.txt
-├── frontend/           # React frontend
-│   ├── src/           # Source code
-│   │   ├── components/  # Reusable React components
-│   │   ├── pages/      # Page components
-│   │   ├── hooks/      # Custom React hooks
-│   │   ├── styles/     # Global styles and Tailwind config
-│   │   └── utils/      # Utility functions
-│   ├── public/        # Static files
-│   └── package.json
-├── certs/             # SSL certificates
-└── docker-compose.yml # Docker composition
+├── backend/                  # Django backend
+│   ├── backend/              # Main Django app (settings, urls, wsgi, etc.)
+│   ├── templates/            # Django HTML templates
+│   ├── certs/                # SSL certificates for backend
+│   ├── geoip_data/           # GeoIP2 data files
+│   ├── requirements.txt      # Python dependencies
+│   ├── Dockerfile            # Backend Docker config
+│   ├── gunicorn.conf.py      # Gunicorn server config
+│   ├── manage.py             # Django management script
+│   └── ...                   # Other backend files
+├── frontend/                 # React frontend
+│   ├── src/                  # Source code
+│   │   ├── components/       # Reusable UI and feature components
+│   │   │   ├── ui/           # UI primitives (Button, Input, Card, etc.)
+│   │   │   ├── auth/         # Authentication-related components
+│   │   │   ├── report/       # Report-related components
+│   │   │   ├── mood/         # Mood-related components
+│   │   │   ├── common/       # Commonly used components (e.g., icons)
+│   │   │   └── ...           # Other feature components
+│   │   ├── pages/            # Top-level pages/routes (Home, Login, Register, etc.)
+│   │   ├── services/         # API and integration services (e.g., Spotify, API calls)
+│   │   ├── context/          # React context providers (e.g., AuthContext)
+│   │   ├── hooks/            # Custom React hooks
+│   │   ├── types/            # TypeScript type definitions
+│   │   ├── utils/            # Utility/helper functions
+│   │   ├── lib/              # Shared libraries/helpers
+│   │   ├── features/         # Feature modules (e.g., playlists, help page features)
+│   │   ├── data/             # Static data (e.g., genres, mood config)
+│   │   ├── App.tsx           # Main app component
+│   │   ├── main.tsx          # App entry point
+│   │   └── index.css         # Global styles
+│   ├── public/               # Static assets
+│   ├── certs/                # SSL certificates for frontend
+│   ├── package.json          # Project metadata and scripts
+│   ├── tailwind.config.js    # Tailwind CSS configuration
+│   ├── vite.config.ts        # Vite configuration
+│   └── ...                   # Other config and setup files
+├── certs/                    # (Optional) Root SSL certificates
+├── docker-compose.yml        # Docker composition for full stack
+└── ...                       # Other root-level files
 ```
+
+- The backend is a Django REST API with support for authentication, mood analysis, and Spotify integration.
+- The frontend is a modern React app with TypeScript, Vite, and Tailwind CSS, featuring modular components and pages.
+- See `frontend/src/components/ui/` for UI primitives, and `frontend/src/pages/` for route-level components.
+- Feature-specific logic is grouped under `frontend/src/features/`.
+- SSL certificates for local development are stored in the respective `certs/` folders.
 
 ## Key Features
 
@@ -126,15 +156,28 @@ For production deployment, consider the following:
 
 ## Environment Variables
 
-Required environment variables:
-- `SECRET_KEY`: Django secret key
-- `DEBUG`: Boolean for debug mode
-- `DB_*`: Database configuration
-- `OPENAI_API_KEY`: OpenAI API key
-- `EMAIL_*`: Email configuration for password reset
-- `SPOTIFY_*`: Spotify API credentials
-- `ALLOWED_HOSTS`: Comma-separated list of allowed hosts
-- `CORS_ORIGIN_WHITELIST`: Allowed CORS origins
+Here's a complete list of required environment variables:
+
+| Variable | Description | Example Value |
+|----------|-------------|---------------|
+| POSTGRES_DB | PostgreSQL database name | bakis |
+| POSTGRES_USER | PostgreSQL username | admin |
+| POSTGRES_PASSWORD | PostgreSQL password | (secure password) |
+| VITE_API_URL | Backend API URL | https://localhost:8000 |
+| VITE_SPOTIFY_CLIENT_ID | Spotify API client ID | (from Spotify Developer Dashboard) |
+| VITE_SPOTIFY_CLIENT_SECRET | Spotify API client secret | (from Spotify Developer Dashboard) |
+| DEBUG | Django debug mode | False in production |
+| CORS_ALLOWED_ORIGINS | Allowed CORS origins | https://localhost:3000 |
+| OPENAI_API_KEY | OpenAI API key | (from OpenAI Dashboard) |
+| EMAIL_HOST_USER | Gmail address | moodmusicplatform@gmail.com |
+| EMAIL_HOST_PASSWORD | Gmail app password | (app-specific password) |
+| FRONTEND_URL | Frontend application URL | https://localhost:3000 |
+| DB_NAME | Django database name | bakis |
+| DB_USER | Django database user | admin |
+| DB_PASSWORD | Django database password | (secure password) |
+| DB_HOST | Database host | db |
+| DB_PORT | Database port | 5432 |
+| SECRET_KEY | Django secret key | (generate secure key) |
 
 ## Security Features
 
@@ -167,28 +210,3 @@ KTU
 - Use proper API keys and credentials
 - Use environment-specific email configuration
 - Configure proper CORS settings
-
-## Environment Variables Reference
-
-Here's a complete list of required environment variables:
-
-| Variable | Description | Example Value |
-|----------|-------------|---------------|
-| POSTGRES_DB | PostgreSQL database name | bakis |
-| POSTGRES_USER | PostgreSQL username | admin |
-| POSTGRES_PASSWORD | PostgreSQL password | (secure password) |
-| VITE_API_URL | Backend API URL | https://localhost:8000 |
-| VITE_SPOTIFY_CLIENT_ID | Spotify API client ID | (from Spotify Developer Dashboard) |
-| VITE_SPOTIFY_CLIENT_SECRET | Spotify API client secret | (from Spotify Developer Dashboard) |
-| DEBUG | Django debug mode | False in production |
-| CORS_ALLOWED_ORIGINS | Allowed CORS origins | https://localhost:3000 |
-| OPENAI_API_KEY | OpenAI API key | (from OpenAI Dashboard) |
-| EMAIL_HOST_USER | Gmail address | moodmusicplatform@gmail.com |
-| EMAIL_HOST_PASSWORD | Gmail app password | (app-specific password) |
-| FRONTEND_URL | Frontend application URL | https://localhost:3000 |
-| DB_NAME | Django database name | bakis |
-| DB_USER | Django database user | admin |
-| DB_PASSWORD | Django database password | (secure password) |
-| DB_HOST | Database host | db |
-| DB_PORT | Database port | 5432 |
-| SECRET_KEY | Django secret key | (generate secure key) |
