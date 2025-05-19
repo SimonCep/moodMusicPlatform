@@ -1,28 +1,79 @@
-# React + TypeScript + Vite
+# Mood Music Platform Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+This is the frontend application for the Mood Music Platform, built with React, TypeScript, and Vite.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- Modern UI with dark/light mode support
+- Interactive password management components
+- Real-time form validation
+- Spotify integration
+- Responsive design
+- Accessibility-focused components
 
-## Expanding the ESLint configuration
+## Technology Stack
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+- React 18+
+- TypeScript
+- Vite
+- Tailwind CSS
+- Shadcn/ui components
+- ESLint + TypeScript ESLint
+
+## Development Setup
+
+1. Install dependencies:
+```bash
+npm install
+```
+
+2. Configure environment variables in `.env`:
+```env
+# Backend API URL
+VITE_API_URL=https://localhost:8000
+
+# Spotify API Configuration
+VITE_SPOTIFY_CLIENT_ID=your_spotify_client_id
+VITE_SPOTIFY_CLIENT_SECRET=your_spotify_client_secret
+```
+
+3. Start the development server:
+```bash
+npm run dev
+```
+
+The application will be available at `https://localhost:3000`.
+
+## Environment Variables
+
+| Variable | Description | Example Value |
+|----------|-------------|---------------|
+| VITE_API_URL | Backend API URL | https://localhost:8000 |
+| VITE_SPOTIFY_CLIENT_ID | Spotify API client ID | (from Spotify Developer Dashboard) |
+| VITE_SPOTIFY_CLIENT_SECRET | Spotify API client secret | (from Spotify Developer Dashboard) |
+
+## Build
+
+To create a production build:
+
+```bash
+npm run build
+```
+
+The build output will be in the `dist` directory.
+
+## ESLint Configuration
+
+The project uses a modern ESLint configuration with TypeScript support. To enable type-aware lint rules:
 
 ```js
 export default tseslint.config({
   extends: [
-    // Remove ...tseslint.configs.recommended and replace with this
     ...tseslint.configs.recommendedTypeChecked,
-    // Alternatively, use this for stricter rules
     ...tseslint.configs.strictTypeChecked,
-    // Optionally, add this for stylistic rules
     ...tseslint.configs.stylisticTypeChecked,
   ],
   languageOptions: {
-    // other options...
     parserOptions: {
       project: ['./tsconfig.node.json', './tsconfig.app.json'],
       tsconfigRootDir: import.meta.dirname,
@@ -31,24 +82,14 @@ export default tseslint.config({
 })
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## Available Scripts
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+- `npm run dev` - Start development server
+- `npm run build` - Create production build
+- `npm run preview` - Preview production build locally
 
-export default tseslint.config({
-  plugins: {
-    // Add the react-x and react-dom plugins
-    'react-x': reactX,
-    'react-dom': reactDom,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended typescript rules
-    ...reactX.configs['recommended-typescript'].rules,
-    ...reactDom.configs.recommended.rules,
-  },
-})
-```
+## SSL Configuration
+
+The development server uses SSL certificates for HTTPS. The certificates should be placed in the `certs` directory:
+- `certs/cert.pem` - SSL certificate
+- `certs/key.pem` - SSL private key

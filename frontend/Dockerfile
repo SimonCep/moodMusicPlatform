@@ -1,13 +1,16 @@
 # frontend/Dockerfile
-FROM node:18
+FROM node:20-alpine
 
 WORKDIR /app
 
-COPY package.json package-lock.json* ./  
+COPY package*.json ./
+
 RUN npm install
 
 COPY . .
 
+RUN mkdir -p /app/certs
+
 EXPOSE 3000
 
-CMD ["npm", "run", "dev", "--", "--host"]
+CMD ["npm", "run", "dev"]

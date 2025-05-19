@@ -104,25 +104,50 @@
   }
   
   .animated-gradient {
-    background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab);
+    background: linear-gradient(-45deg, 
+      rgba(238, 119, 82, 0.7),
+      rgba(231, 60, 126, 0.7),
+      rgba(35, 166, 213, 0.7),
+      rgba(35, 213, 171, 0.7)
+    );
     background-size: 400% 400%;
     animation: gradient-animation 15s ease infinite;
   }
   
   .theme-happy .animated-gradient {
-    background: linear-gradient(-45deg, #FFD700, #FFA500, #FF8C00, #FF7F50);
+    background: linear-gradient(-45deg,
+      rgba(255, 215, 0, 0.7),
+      rgba(255, 165, 0, 0.7),
+      rgba(255, 140, 0, 0.7),
+      rgba(255, 127, 80, 0.7)
+    );
   }
   
   .theme-melancholy .animated-gradient {
-    background: linear-gradient(-45deg, #4682B4, #5F9EA0, #6495ED, #7B68EE);
+    background: linear-gradient(-45deg,
+      rgba(70, 130, 180, 0.7),
+      rgba(95, 158, 160, 0.7),
+      rgba(100, 149, 237, 0.7),
+      rgba(123, 104, 238, 0.7)
+    );
   }
   
   .theme-energetic .animated-gradient {
-    background: linear-gradient(-45deg, #FF4500, #FF6347, #FF7F50, #FF8C00);
+    background: linear-gradient(-45deg,
+      rgba(255, 69, 0, 0.7),
+      rgba(255, 99, 71, 0.7),
+      rgba(255, 127, 80, 0.7),
+      rgba(255, 140, 0, 0.7)
+    );
   }
   
   .theme-calm .animated-gradient {
-    background: linear-gradient(-45deg, #20B2AA, #48D1CC, #40E0D0, #00CED1);
+    background: linear-gradient(-45deg,
+      rgba(32, 178, 170, 0.7),
+      rgba(72, 209, 204, 0.7),
+      rgba(64, 224, 208, 0.7),
+      rgba(0, 206, 209, 0.7)
+    );
   }
 
   .genre-selector-container {
@@ -135,8 +160,8 @@
   }
 
   .glass-card {
-    background: rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.15);
     backdrop-filter: blur(8px);
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.2);
   }

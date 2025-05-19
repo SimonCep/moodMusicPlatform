@@ -9,3 +9,6 @@ djangorestframework-simplejwt
 python-dotenv
 spotipy
 geoip2>=4.1.0
+pyOpenSSL>=23.3.0
+cryptography>=42.0.0
+gunicorn>=21.2.0

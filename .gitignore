@@ -1,14 +1,92 @@
-# Environment variables
+# Dependencies
+node_modules/
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Environment
 .env
+.env.*
+!.env.example
+.venv
+env/
+venv/
 
-# Docker
-**/docker-compose.override.yml
+# Build outputs
+dist/
+build/
+*.egg-info/
+dist-ssr/
 
-# OS generated files
+# SSL Certificates
+*.pem
+*.key
+*.crt
+certs/
+
+# IDE
+.vscode/
+!.vscode/extensions.json
+.idea/
+*.swp
+*.swo
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+
+# OS
 .DS_Store
 .DS_Store?
 ._*
 .Spotlight-V100
 .Trashes
+Thumbs.db
 ehthumbs.db
-Thumbs.db 
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Database
+*.sqlite3
+*.db
+db.sqlite3-journal
+
+# Cache
+.cache/
+.pytest_cache/
+.eslintcache
+.hypothesis/
+__pypackages__/
+
+# Local development
+.local/
+*.local
+local_settings.py
+
+# Docker
+.docker/
+docker-compose.override.yml
+
+# Testing and coverage
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+
+# Temporary files
+*.zip
+for\ context.txt 
+backend/backend/env

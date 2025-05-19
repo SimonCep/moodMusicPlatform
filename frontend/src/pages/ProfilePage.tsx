@@ -1,11 +1,8 @@
 import React, { useState, useEffect } from 'react';
-// BackButton removed, navigation handled by NavBar/Layout
-// Logout button moved to NavBar
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-// Import Dialog components if Edit Profile opens a dialog
 import {
   Dialog,
   DialogContent,
@@ -21,7 +18,9 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { toast } from 'sonner';
-import { apiClient } from '@/services/api'; // Corrected import
+import { apiClient } from '@/services/api';
+import { PasswordRequirements } from '@/components/PasswordRequirements';
+import { X } from 'lucide-react';
 
 // Define the shape of the user profile data
 interface UserProfile {
@@ -33,11 +32,16 @@ interface UserProfile {
 // Validation schema for the change password form
 const changePasswordSchema = z.object({
     old_password: z.string().min(1, "Current password is required"),
-    new_password1: z.string().min(8, "New password must be at least 8 characters"),
+    new_password1: z.string()
+        .min(8, "Password must be at least 8 characters")
+        .regex(/[A-Z]/, "Password must contain at least one uppercase letter")
+        .regex(/[a-z]/, "Password must contain at least one lowercase letter")
+        .regex(/[0-9]/, "Password must contain at least one number")
+        .regex(/[!@#$%^&*(),.?":{}|<>]/, "Password must contain at least one special character"),
     new_password2: z.string().min(8, "Confirm password must be at least 8 characters"),
 }).refine((data) => data.new_password1 === data.new_password2, {
     message: "New passwords don't match",
-    path: ["new_password2"], // Point error to the confirmation field
+    path: ["new_password2"],
 });
 
 type ChangePasswordFormValues = z.infer<typeof changePasswordSchema>;
@@ -48,6 +52,17 @@ const ProfilePage: React.FC = () => {
   const [isLoadingPassword, setIsLoadingPassword] = useState(false);
   const [profileError, setProfileError] = useState<string | null>(null);
   const [isPasswordDialogOpen, setIsPasswordDialogOpen] = useState(false);
+  const [isNewPasswordFocused, setIsNewPasswordFocused] = useState(false);
+
+  // Setup form hook
+  const form = useForm<ChangePasswordFormValues>({
+    resolver: zodResolver(changePasswordSchema),
+    defaultValues: {
+      old_password: "",
+      new_password1: "",
+      new_password2: "",
+    },
+  });
 
   // Fetch user profile on component mount
   useEffect(() => {
@@ -69,16 +84,6 @@ const ProfilePage: React.FC = () => {
 
     fetchProfile();
   }, []);
-
-  // Setup form hook
-  const form = useForm<ChangePasswordFormValues>({
-    resolver: zodResolver(changePasswordSchema),
-    defaultValues: {
-      old_password: "",
-      new_password1: "",
-      new_password2: "",
-    },
-  });
 
   // Handle password change submission
   const onSubmitPassword = async (data: ChangePasswordFormValues) => {
@@ -182,9 +187,17 @@ const ProfilePage: React.FC = () => {
                       <FormItem>
                         <FormLabel>New Password</FormLabel>
                         <FormControl>
-                          <Input type="password" placeholder="Enter new password" {...field} className="bg-input/50" />
+                          <Input 
+                            {...field}
+                            type="password" 
+                            placeholder="Enter new password"
+                            className="bg-input/50"
+                            onFocus={() => setIsNewPasswordFocused(true)}
+                            onBlur={() => setIsNewPasswordFocused(false)}
+                          />
                         </FormControl>
                         <FormMessage />
+                        <PasswordRequirements password={field.value} isVisible={isNewPasswordFocused} />
                       </FormItem>
                     )}
                   />
@@ -198,6 +211,14 @@ const ProfilePage: React.FC = () => {
                           <Input type="password" placeholder="Confirm new password" {...field} className="bg-input/50" />
                         </FormControl>
                         <FormMessage />
+                        {form.watch('new_password1') !== field.value && field.value && (
+                          <div className="mt-2 p-3 rounded-md bg-background/80 dark:bg-background/60 border border-input shadow-sm transition-all duration-200 ease-in-out">
+                            <div className="flex items-center space-x-2 text-sm text-muted-foreground">
+                              <X className="h-3.5 w-3.5" />
+                              <span>Passwords do not match</span>
+                            </div>
+                          </div>
+                        )}
                       </FormItem>
                     )}
                   />

@@ -1,11 +1,13 @@
-import React, { useState, useEffect } from 'react';
-import { Link, useParams, useNavigate } from 'react-router-dom';
+import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { confirmPasswordReset } from '../services/api'; // Adjusted path for services
+import { confirmPasswordReset } from '../services/api';
 import { toast } from 'sonner';
+import { PasswordRequirements } from './PasswordRequirements';
+import { X } from 'lucide-react';
 
 interface ResetPasswordConfirmFormProps {
   uidb64: string;
@@ -17,23 +19,30 @@ const ResetPasswordConfirmForm: React.FC<ResetPasswordConfirmFormProps> = ({ uid
   const [newPassword1, setNewPassword1] = useState('');
   const [newPassword2, setNewPassword2] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  // const [error, setError] = useState<string | null>(null); // Local error state can be managed by toast
+  const [isPasswordFocused, setIsPasswordFocused] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // setError(null);
+
+    // Client-side password validation
+    const passwordRequirements = [
+      { test: newPassword1.length >= 8, message: "Password must be at least 8 characters long." },
+      { test: /[A-Z]/.test(newPassword1), message: "Password must contain at least one uppercase letter." },
+      { test: /[a-z]/.test(newPassword1), message: "Password must contain at least one lowercase letter." },
+      { test: /[0-9]/.test(newPassword1), message: "Password must contain at least one number." },
+      { test: /[!@#$%^&*(),.?":{}|<>]/.test(newPassword1), message: "Password must contain at least one special character." }
+    ];
+
+    const failedRequirements = passwordRequirements.filter(req => !req.test);
+    if (failedRequirements.length > 0) {
+      toast.error("Password Requirements Not Met", {
+        description: failedRequirements.map(req => req.message).join('\n')
+      });
+      return;
+    }
 
     if (newPassword1 !== newPassword2) {
       toast.error('Passwords do not match.');
-      return;
-    }
-    if (newPassword1.length < 8) {
-      toast.error("Password must be at least 8 characters long.");
-      return;
-    }
-    if (!uidb64 || !token) {
-      toast.error('Invalid password reset link parameters.');
-      // This case should ideally be handled by the parent page before rendering the form
       return;
     }
 
@@ -46,7 +55,7 @@ const ResetPasswordConfirmForm: React.FC<ResetPasswordConfirmFormProps> = ({ uid
         new_password2: newPassword2,
       });
       toast.success('Password reset successfully! You can now log in.');
-      onSuccess(); // Call the onSuccess prop to handle navigation/state in parent
+      onSuccess();
     } catch (err: any) {
       const errorData = err.response?.data;
       let errorMessage = 'Failed to reset password. Link may be invalid/expired or password invalid.';
@@ -67,7 +76,6 @@ const ResetPasswordConfirmForm: React.FC<ResetPasswordConfirmFormProps> = ({ uid
         errorMessage = err.message;
       }
 
-      // setError(errorMessage.replace(/\n/g, '; '));
       toast.error("Password Reset Failed", { description: errorMessage.replace(/\n/g, '; ') });
       console.error("Password reset confirmation failed:", errorData || err);
     } finally {
@@ -91,13 +99,16 @@ const ResetPasswordConfirmForm: React.FC<ResetPasswordConfirmFormProps> = ({ uid
               <Input 
                 id="new-password" 
                 type="password" 
-                placeholder="Enter new password (min 8 chars)" 
+                placeholder="Enter new password" 
                 value={newPassword1}
                 onChange={(e) => setNewPassword1(e.target.value)}
+                onFocus={() => setIsPasswordFocused(true)}
+                onBlur={() => setIsPasswordFocused(false)}
                 required
                 minLength={8}
                 className="bg-input/50"
               />
+              <PasswordRequirements password={newPassword1} isVisible={isPasswordFocused} />
             </div>
             <div className="flex flex-col space-y-1.5">
               <Label htmlFor="confirm-password">Confirm New Password</Label>
@@ -110,6 +121,14 @@ const ResetPasswordConfirmForm: React.FC<ResetPasswordConfirmFormProps> = ({ uid
                 required
                 className="bg-input/50"
               />
+              {newPassword1 !== newPassword2 && newPassword2 && (
+                <div className="mt-2 p-3 rounded-md bg-background/80 dark:bg-background/60 border border-input shadow-sm transition-all duration-200 ease-in-out">
+                  <div className="flex items-center space-x-2 text-sm text-muted-foreground">
+                    <X className="h-3.5 w-3.5" />
+                    <span>Passwords do not match</span>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </CardContent>

@@ -10,7 +10,7 @@ export function BackgroundParticles() {
 
   return (
     <Particles
-      className="absolute inset-0 -z-10"
+      className="fixed inset-0 -z-10 pointer-events-none"
       init={particlesInit}
       options={{
         background: {
@@ -36,10 +36,10 @@ export function BackgroundParticles() {
               enable: true,
               area: 800
             },
-            value: 20
+            value: 30
           },
           opacity: {
-            value: 0.3
+            value: 0.4
           },
           shape: {
             type: "circle"
