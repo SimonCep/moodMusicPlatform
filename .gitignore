@@ -22,7 +22,9 @@ dist-ssr/
 *.pem
 *.key
 *.crt
-certs/
+# Allow example certificate files
+!*.pem.example
+!*.key.example
 
 # IDE
 .vscode/

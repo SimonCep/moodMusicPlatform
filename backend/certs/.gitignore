@@ -1,0 +1,5 @@
+# Ignore real certificates
+*
+# But allow example files
+!.gitignore
+!*.example
