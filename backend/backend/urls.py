@@ -22,13 +22,9 @@ urlpatterns = [
     path('api/mood-history/', views.MoodHistoryView.as_view(), name='mood_history'),
     path('api/emotion-recommendation/', views.get_emotion_recommendation, name='emotion_recommendation'),
     path('api/analyze-emotion-openai/', views.AnalyzeEmotionOpenAIView.as_view(), name='analyze_emotion_openai'),
-
-    # New URLs for playlist track management
     path('api/playlists/<int:playlist_pk>/tracks/<int:track_pk>/remove/', views.remove_track_from_playlist, name='playlist_track_remove'),
     path('api/playlists/<int:playlist_pk>/tracks/add/', views.add_track_to_playlist, name='playlist_track_add'),
     path('api/playlists/<int:playlist_pk>/tracks/reorder/', views.reorder_playlist_tracks, name='playlist_tracks_reorder'),
     path('api/playlists/<int:playlist_pk>/tracks/find-and-add/', views.find_and_add_spotify_track, name='playlist_track_find_and_add'),
 
-    # Mood Analyzer URLs
-    # path('api/mood-analyzer/', include('mood_analyzer.urls')),
 ]

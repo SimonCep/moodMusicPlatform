@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { confirmPasswordReset } from '../../services/api'; // Assume this will be created
+import { confirmPasswordReset } from '../../services/api';
 import { toast } from 'sonner';
 
 const ResetPassword: React.FC = () => {
@@ -14,26 +14,22 @@ const ResetPassword: React.FC = () => {
     const [success, setSuccess] = useState(false);
 
     useEffect(() => {
-        // Basic validation of params presence
         if (!uidb64 || !token) {
             setError('Invalid password reset link.');
             toast.error('Invalid password reset link.');
-            // Optionally redirect to login or show a more specific error page
         }
     }, [uidb64, token]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        setError(null); // Clear previous errors
+        setError(null);
         
-        // Client-side password match check
         if (newPassword1 !== newPassword2) {
             setError('Passwords do not match.');
             toast.error('Passwords do not match.');
             return;
         }
         
-         // Client-side password length check (optional)
         if (newPassword1.length < 8) {
              setError("Password must be at least 8 characters long.");
              toast.error("Password must be at least 8 characters long.");
@@ -61,16 +57,14 @@ const ResetPassword: React.FC = () => {
             setTimeout(() => navigate('/login', { replace: true }), 2000);
         } catch (err: any) {
             const errorData = err.response?.data;
-            let errorMessage = 'Failed to reset password. The link may be invalid or expired, or the password may not meet requirements.'; // More informative default
+            let errorMessage = 'Failed to reset password. The link may be invalid or expired, or the password may not meet requirements.';
             
             if (errorData) {
                 const fieldErrors = [];
-                // Check for specific DRF validation errors on passwords
                 if (errorData.new_password1) {
                     fieldErrors.push(`Password: ${errorData.new_password1.join(' ')}`);
                 }
                 if (errorData.new_password2) {
-                    // Often contains password validation rules errors
                     fieldErrors.push(`Password Confirmation: ${errorData.new_password2.join(' ')}`);
                 }
                 if (errorData.token) {
@@ -79,19 +73,17 @@ const ResetPassword: React.FC = () => {
                 if (errorData.uidb64) {
                     fieldErrors.push(`User ID Error: ${errorData.uidb64.join(' ')}`);
                 }
-                // Handle non_field_errors (e.g., from custom validation)
                 if (errorData.non_field_errors) {
                      fieldErrors.push(errorData.non_field_errors.join(' '));
                 }
-                // Handle simple detail string
                 if (errorData.detail && fieldErrors.length === 0) {
                      fieldErrors.push(errorData.detail);
                 }
 
                 if (fieldErrors.length > 0) {
-                    errorMessage = fieldErrors.join(' \n '); // Join errors with newline
+                    errorMessage = fieldErrors.join(' \n ');
                 } else if (typeof errorData === 'string') {
-                    errorMessage = errorData; // Generic string error
+                    errorMessage = errorData;
                 } else if (err.response?.statusText) {
                      errorMessage = `Error: ${err.response.statusText}`;
                 }
@@ -104,7 +96,6 @@ const ResetPassword: React.FC = () => {
             toast.error("Password Reset Failed", { 
                 description: errorMessage.replace(/\n/g, '; ')
             });
-            console.error("Password reset confirmation failed:", errorData || err);
         } finally {
             setIsLoading(false);
         }

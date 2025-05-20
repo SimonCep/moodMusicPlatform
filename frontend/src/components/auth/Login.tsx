@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { toast } from 'sonner';
 
@@ -8,31 +8,27 @@ const Login: React.FC = () => {
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
     const { login, isLoading } = useAuth();
-    const navigate = useNavigate();
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setError('');
         try {
             await login({ username, password });
-            // No need to navigate here, AuthProvider state change handles redirect via Protected/Public Routes
-            // navigate('/app', { replace: true }); 
         } catch (err: any) {
-             let errorMessage = 'Login failed. Please check your username and password.'; // Default message
+             let errorMessage = 'Login failed. Please check your username and password.';
              const errorDetail = err.response?.data?.detail;
              const errorStatus = err.response?.status;
 
             if (errorDetail && errorStatus === 401) {
                 errorMessage = errorDetail; 
             } else if (err.response?.data?.error) {
-                errorMessage = err.response.data.error; // Other potential error structures
+                errorMessage = err.response.data.error;
             } else if (err.message) {
-                errorMessage = err.message; // Network error, etc.
+                errorMessage = err.message;
             }
 
             setError(errorMessage);
             toast.error("Login Failed", { description: errorMessage });
-            console.error("Login failed API details:", err.response?.data || err);
         }
     };
 

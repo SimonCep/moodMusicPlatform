@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { getEmotionRecommendation } from '@/services/api'; // Assuming api services are in @/services
+import { getEmotionRecommendation } from '@/services/api';
 import { Mood, EmotionRecommendationError } from '@/types';
 import { toast } from 'sonner';
 
@@ -22,11 +22,9 @@ export const useMoodAdvice = () => {
                     description: "Here are some tailored recommendations."
                 });
             } else {
-                console.warn("Recommendation data from backend was incomplete or not an array:", recommendationData);
                 throw new Error("Received incomplete or invalid recommendation data.");
             }
         } catch (err: any) {
-            console.error("Error fetching emotion recommendation:", err);
             let errorMessage = "Failed to get advice.";
             if (err.response?.data) {
                 const errorData = err.response.data as EmotionRecommendationError;
@@ -48,8 +46,5 @@ export const useMoodAdvice = () => {
         isLoadingAdvice,
         errorAdvice,
         handleGetAdvice,
-        // Exposing setSelectedMoodIdForAdvice might be useful if another component needs to reset it
-        // or trigger advice display from outside, but for now, let's keep it internal to the hook + handleGetAdvice trigger
-        // setSelectedMoodIdForAdvice 
     };
 }; 

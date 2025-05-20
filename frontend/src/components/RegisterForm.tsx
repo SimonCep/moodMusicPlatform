@@ -9,11 +9,7 @@ import { toast } from 'sonner';
 import { PasswordRequirements } from './PasswordRequirements';
 import { X } from 'lucide-react';
 
-interface RegisterFormProps {
-  // Props can be added here if needed, e.g., onRegisterSuccess
-}
-
-const RegisterForm: React.FC<RegisterFormProps> = () => {
+const RegisterForm = () => {
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -25,7 +21,6 @@ const RegisterForm: React.FC<RegisterFormProps> = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Client-side password validation
     const passwordRequirements = [
       { test: password.length >= 8, message: "Password must be at least 8 characters long." },
       { test: /[A-Z]/.test(password), message: "Password must contain at least one uppercase letter." },
@@ -72,7 +67,6 @@ const RegisterForm: React.FC<RegisterFormProps> = () => {
       }
 
       toast.error("Registration Failed", { description: errorMessage.replace(/\n/g, '; ') });
-      console.error("Registration failed API details:", errorData || err.message);
     }
   };
 
@@ -148,10 +142,20 @@ const RegisterForm: React.FC<RegisterFormProps> = () => {
           </div>
         </CardContent>
         <CardFooter className="flex flex-col space-y-2">
-          <Button type="submit" className="w-full" disabled={isLoading}>
+          <Button 
+            type="submit" 
+            variant="outline"
+            className="w-full text-primary border-primary hover:bg-primary/10 cursor-pointer transform transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] hover:shadow-md" 
+            disabled={isLoading}
+          >
             {isLoading ? 'Registering...' : 'Register'}
           </Button>
-          <Button variant="link" size="sm" asChild>
+          <Button 
+            variant="link" 
+            size="sm" 
+            className="text-primary hover:text-primary/80 cursor-pointer transform transition-all duration-300 hover:scale-[1.02]" 
+            asChild
+          >
             <Link to="/login">Already have an account? Log In</Link>
           </Button>
         </CardFooter>

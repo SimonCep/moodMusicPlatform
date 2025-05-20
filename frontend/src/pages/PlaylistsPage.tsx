@@ -11,7 +11,7 @@ import {
 
 import { PlusCircle, Save, Ban as CancelIcon, Edit3 as ReorderIcon } from 'lucide-react';
 import { toast } from 'sonner';
-import { Track, Playlist } from '../types'; // Ensure Track & Playlist types are correctly imported/defined
+import { Track, Playlist } from '../types';
 import { usePlaylistsData } from '../features/playlists/hooks/usePlaylistsData';
 import { useTrackPreview, TrackPreviewStates } from '../features/playlists/hooks/useTrackPreview';
 import { formatPlaylistDate } from '../features/playlists/utils/dateUtils';
@@ -93,7 +93,6 @@ const PlaylistsPage: React.FC = () => {
       });
       handleCloseFeedbackPopup();
     } catch (error: any) {
-      // console.error removed
       toast.error(`Failed to replace "${originalTitle}"`, {
         id: toastId,
         description: error.response?.data?.detail || error.message || "Please try again later."
@@ -127,21 +126,15 @@ const PlaylistsPage: React.FC = () => {
                 const tracksForDisplay = isReorderModeForThisPlaylist && playlistTracksBeingReordered 
                   ? playlistTracksBeingReordered 
                   : playlist.tracks;
-
-                // Removed debug logs
-
                 const showDisclaimer = playlist.total_tracks_generated != null && playlist.llm_fallback_count != null &&
                                      playlist.total_tracks_generated > 0 && 
                                      playlist.llm_fallback_count > playlist.total_tracks_generated / 2;
-
-                // Removed debug logs
-
                 return (
                   <AccordionItem value={`item-${index}`} key={currentPlaylistIdStr} className="mb-2 border-b-0 rounded-lg overflow-hidden shadow-md bg-black/5 backdrop-blur-md border border-white/10">
-                    <AccordionTrigger className="text-left hover:no-underline px-6 py-4 data-[state=open]:bg-primary/10 group">
+                    <AccordionTrigger className="text-left hover:no-underline px-6 py-4 data-[state=open]:bg-primary/10 group cursor-pointer transition-all duration-300 hover:scale-[1.01]">
                       <div className="flex-1 flex items-center justify-between">
                         <div className="flex flex-col text-left">
-                          <span className="truncate mr-2 font-medium text-lg text-card-foreground">{playlist.name || 'Unnamed Playlist'}</span>
+                          <span className="truncate mr-2 font-medium text-lg text-card-foreground group-hover:text-primary transition-colors">{playlist.name || 'Unnamed Playlist'}</span>
                           <span className="text-xs text-card-foreground/80">
                             {formatPlaylistDate(playlist.created_at)} - {playlist.tracks ? playlist.tracks.length : 0} tracks
                           </span>
@@ -150,40 +143,40 @@ const PlaylistsPage: React.FC = () => {
                           {!isReorderModeForThisPlaylist && (
                             <Button
                               variant="ghost" size="icon"
-                              onClick={(e: React.MouseEvent) => { e.stopPropagation(); openAddSongDialogFromHook(currentPlaylistIdStr); }} // Typed 'e'
-                              className="text-primary hover:text-primary/80"
+                              onClick={(e: React.MouseEvent) => { e.stopPropagation(); openAddSongDialogFromHook(currentPlaylistIdStr); }}
+                              className="text-primary hover:text-primary/80 cursor-pointer transition-all duration-300 hover:scale-110"
                               aria-label="Add song to playlist"
                             >
-                              <PlusCircle size={20} />
+                              <PlusCircle size={20} className="opacity-70 hover:opacity-100 transition-opacity" />
                             </Button>
                           )}
                           {isReorderModeForThisPlaylist ? (
                             <>
                               <Button
-                                variant="outline" size="icon"
-                                onClick={(e: React.MouseEvent) => { e.stopPropagation(); handleSaveReorderedTracks(); }} // Typed 'e'
-                                className="text-green-500 border-green-500 hover:bg-green-500/10 hover:text-green-600"
+                                variant="ghost" size="icon"
+                                onClick={(e: React.MouseEvent) => { e.stopPropagation(); handleSaveReorderedTracks(); }}
+                                className="text-green-500 border-green-500 hover:bg-green-500/10 hover:text-green-600 cursor-pointer transition-all duration-300 hover:scale-110"
                                 title="Save Order"
                               >
-                                <Save size={18} />
+                                <Save size={18} className="opacity-70 hover:opacity-100 transition-opacity" />
                               </Button>
                               <Button
                                 variant="ghost" size="icon"
-                                onClick={(e: React.MouseEvent) => { e.stopPropagation(); cancelReorder(currentPlaylistIdStr); }} // Typed 'e'
-                                className="text-destructive hover:text-destructive/80"
+                                onClick={(e: React.MouseEvent) => { e.stopPropagation(); cancelReorder(currentPlaylistIdStr); }}
+                                className="text-red-500 border-red-500 hover:bg-red-500/10 hover:text-red-600 cursor-pointer transition-all duration-300 hover:scale-110"
                                 title="Cancel Reorder"
                               >
-                                <CancelIcon size={20} />
+                                <CancelIcon size={20} className="opacity-70 hover:opacity-100 transition-opacity" />
                               </Button>
                             </>
                           ) : (
                             <Button
                               variant="ghost" size="icon"
-                              onClick={(e: React.MouseEvent) => { e.stopPropagation(); handleToggleReorderMode(currentPlaylistIdStr); }} // Typed 'e'
-                              className="text-blue-500 hover:text-blue-600"
+                              onClick={(e: React.MouseEvent) => { e.stopPropagation(); handleToggleReorderMode(currentPlaylistIdStr); }}
+                              className="text-blue-500 hover:text-blue-600 cursor-pointer transition-all duration-300 hover:scale-110"
                               title="Reorder Playlist"
                             >
-                              <ReorderIcon size={18} />
+                              <ReorderIcon size={18} className="opacity-70 hover:opacity-100 transition-opacity" />
                             </Button>
                           )}
                         </div>
@@ -236,7 +229,7 @@ const PlaylistsPage: React.FC = () => {
 
       <AddSongDialog 
         open={showAddSongDialog}
-        onOpenChange={(isOpen: boolean) => !isOpen && closeAddSongDialog()} // Typed 'isOpen'
+        onOpenChange={(isOpen: boolean) => !isOpen && closeAddSongDialog()}
         title={addSongTitle}
         onTitleChange={setAddSongTitle}
         artist={addSongArtist}

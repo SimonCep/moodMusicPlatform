@@ -5,10 +5,8 @@ import {
     Loader2, MessageSquareWarning, ListChecks
 } from 'lucide-react';
 
-// Hooks
 import { useMoodReportData } from '@/hooks/useMoodReportData';
 
-// Section Components
 import ReportHeaderSection from '@/components/report/ReportHeaderSection';
 import MoodDistributionSection from '@/components/report/MoodDistributionSection';
 import EnergyLevelsSection from '@/components/report/EnergyLevelsSection';
@@ -22,11 +20,11 @@ const ReportPage: React.FC = () => {
     dateRange,
     setDateRange,
     filteredMoods,
-    chartMoodData,      // Raw data for PDF
-    accordionMoodData,  // Raw data for Detailed Entries & PDF
-    moodDistributionData, // Data for Pie Chart & PDF
-    totalMoodCountForPie, // For Pie Chart tooltip
-    chartDisplayData,   // Formatted data for Line Chart
+    chartMoodData,
+    accordionMoodData,
+    moodDistributionData,
+    totalMoodCountForPie,
+    chartDisplayData,
     isLoadingDataPDF,
     setIsLoadingDataPDF
   } = useMoodReportData();
@@ -90,7 +88,6 @@ const ReportPage: React.FC = () => {
                 )}
             </CardContent>
 
-            {/* Render actions section if no history fetch error */}
             {!errorHistory && (
                  <ReportActionsSection
                     dateRange={dateRange}
@@ -100,13 +97,12 @@ const ReportPage: React.FC = () => {
                     setIsLoadingDataPDF={setIsLoadingDataPDF}
                     filteredMoods={filteredMoods}
                     accordionMoodData={accordionMoodData}
-                    chartMoodDataForPdf={chartMoodData} // Pass the original chartMoodData for PDF
+                    chartMoodDataForPdf={chartMoodData}
                     moodDistributionData={moodDistributionData}
                 />
             )}
 
             <CardFooter className="text-xs text-card-foreground/70">
-                {/* Footer content can be added here if needed in the future */}
             </CardFooter>
         </Card>
     </div>

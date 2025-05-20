@@ -18,7 +18,6 @@ interface MoodDistributionSectionProps {
     totalMoodCountForPie: number;
 }
 
-// Custom active shape for Pie chart (internalized)
 const renderActiveShape = (props: any) => {
     const { cx, cy, innerRadius, outerRadius, startAngle, endAngle, fill } = props;
     return (
@@ -27,7 +26,7 @@ const renderActiveShape = (props: any) => {
                 cx={cx}
                 cy={cy}
                 innerRadius={innerRadius}
-                outerRadius={outerRadius + 2} // Slight expansion on hover
+                outerRadius={outerRadius + 2}
                 startAngle={startAngle}
                 endAngle={endAngle}
                 fill={fill}
@@ -38,10 +37,9 @@ const renderActiveShape = (props: any) => {
     );
 };
 
-// Custom Tooltip for Pie Chart (internalized)
 const renderCustomPieTooltip = ({ active, payload }: any, totalMoodCount: number) => {
     if (active && payload && payload.length && totalMoodCount > 0) {
-        const dataPoint = payload[0].payload; // The actual data object {name, value, fill}
+        const dataPoint = payload[0].payload;
         const value = dataPoint.value;
         const name = dataPoint.name;
         const percent = totalMoodCount > 0 ? (value / totalMoodCount * 100).toFixed(0) : 0;
@@ -92,27 +90,48 @@ const MoodDistributionSection: React.FC<MoodDistributionSectionProps> = ({
                         activeShape={renderActiveShape}
                         onMouseEnter={(_, index) => setActivePieIndex(index)}
                         onMouseLeave={() => setActivePieIndex(null)}
-                        isAnimationActive={false} // Consider true for subtle animation if desired
+                        isAnimationActive={true}
+                        animationBegin={0}
+                        animationDuration={800}
+                        animationEasing="ease-out"
+                        className="cursor-pointer"
                     >
                         {moodDistributionData.map((entry, index) => (
-                            <Cell key={`cell-${index}`} fill={entry.fill} strokeWidth={0}/>
+                            <Cell 
+                                key={`cell-${index}`} 
+                                fill={entry.fill} 
+                                strokeWidth={0}
+                                className="cursor-pointer transition-all duration-300 hover:opacity-80"
+                                style={{ cursor: 'pointer' }}
+                            />
                         ))}
                     </Pie>
-                    <Tooltip content={(props) => renderCustomPieTooltip(props, totalMoodCountForPie)} />
+                    <Tooltip 
+                        content={(props) => renderCustomPieTooltip(props, totalMoodCountForPie)}
+                        cursor={{ className: 'cursor-pointer' }}
+                    />
                     <PieLegend 
                         verticalAlign="bottom" 
                         align="center" 
                         iconSize={10}
                         wrapperStyle={{
                             fontSize: '12px',
-                            color: 'hsl(var(--card-foreground))', // Ensure this CSS var is available
+                            color: 'hsl(var(--card-foreground))',
                             display: 'flex', 
                             justifyContent: 'center', 
                             width: '100%', 
                             textAlign: 'center',
                             paddingTop: '10px'
                         }}
-                        formatter={(value) => <span style={{ color: 'hsl(var(--card-foreground))' }}>{value}</span>}
+                        formatter={(value) => (
+                            <span 
+                                style={{ 
+                                    color: 'hsl(var(--card-foreground))'
+                                }}
+                            >
+                                {value}
+                            </span>
+                        )}
                     />
                 </PieChart>
             </ResponsiveContainer>

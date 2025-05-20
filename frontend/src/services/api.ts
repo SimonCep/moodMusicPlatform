@@ -37,13 +37,11 @@ apiClient.interceptors.response.use(
       url !== '/api/token/' && url !== '/api/token/refresh/') {
       originalRequest._retry = true;
       try {
-        console.log('Attempting token refresh...');
         const refresh = localStorage.getItem('refreshToken');
         if (!refresh) {
           throw new Error("No refresh token available for refresh attempt.");
         }
         const { data } = await axios.post(`${API_URL}/api/token/refresh/`, { refresh });
-        console.log('Token refresh successful');
         localStorage.setItem('accessToken', data.access);
         apiClient.defaults.headers.common['Authorization'] = `Bearer ${data.access}`;
         originalRequest.headers['Authorization'] = `Bearer ${data.access}`;
@@ -110,7 +108,6 @@ export const getPlaylistHistory = async (): Promise<Playlist[]> => {
 };
 
 export const getSpecializedPlaylists = async (): Promise<SpecializedPlaylist[]> => {
-  console.log("API: Fetching specialized playlists from /api/specialized-playlists/");
   const response = await apiClient.get<SpecializedPlaylist[]>('/api/specialized-playlists/');
   return response.data;
 };
@@ -121,7 +118,6 @@ export const replacePlaylistTrack = async (
     rating: number, 
     comment: string
 ): Promise<Track> => {
-    console.log(`API: Requesting replacement for track ${trackId} in playlist ${playlistId}`);
     const response = await apiClient.post<Track>(
         `/api/playlists/${playlistId}/tracks/${trackId}/replace/`, 
         {

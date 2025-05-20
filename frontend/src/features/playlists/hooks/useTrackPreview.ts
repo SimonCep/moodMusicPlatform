@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react';
 import { toast } from 'sonner';
-import { Track } from '../../../types'; // Adjust if your types are elsewhere
-import { searchSpotifyTrack } from '../../../services/spotify'; // Adjust to your spotify service path
+import { Track } from '../../../types';
+import { searchSpotifyTrack } from '../../../services/spotify';
 
 export interface TrackPreviewState {
     uri: string | null | undefined;

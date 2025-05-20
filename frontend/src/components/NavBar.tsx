@@ -30,7 +30,7 @@ const NavBar: React.FC = () => {
                   variant="ghost" 
                   size="sm"
                   className={cn(
-                    "transition-colors hover:bg-accent/50 hover:text-accent-foreground",
+                    "transition-all duration-300 hover:bg-accent/50 hover:text-accent-foreground cursor-pointer hover:scale-105",
                     location.pathname === item.path 
                       ? "bg-accent text-accent-foreground" 
                       : "text-muted-foreground"
@@ -47,7 +47,7 @@ const NavBar: React.FC = () => {
                 key="/profile"
                 to="/profile"
                 className={cn(
-                  "text-sm font-medium transition-colors hover:text-accent-foreground",
+                  "text-sm font-medium transition-all duration-300 hover:text-accent-foreground cursor-pointer hover:scale-105",
                   location.pathname === '/profile' 
                     ? "text-accent-foreground"
                     : "text-muted-foreground"
@@ -56,7 +56,7 @@ const NavBar: React.FC = () => {
                 {user.username}
               </Link>
             )}
-            <Button variant="outline" size="sm" onClick={logout}>
+            <Button variant="outline" size="sm" onClick={logout} className="cursor-pointer transition-all duration-300 hover:scale-105 hover:bg-accent/50">
               Logout
             </Button>
           </div>

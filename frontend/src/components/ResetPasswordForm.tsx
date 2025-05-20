@@ -4,14 +4,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { requestPasswordReset } from '../services/api'; // Adjusted path for services
+import { requestPasswordReset } from '../services/api';
 import { toast } from 'sonner';
 
-interface ResetPasswordFormProps {
-  // Props can be added here if needed
-}
-
-const ResetPasswordForm: React.FC<ResetPasswordFormProps> = () => {
+const ResetPasswordForm = () => {
   const [email, setEmail] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
@@ -27,7 +23,6 @@ const ResetPasswordForm: React.FC<ResetPasswordFormProps> = () => {
     } catch (err: any) {
       const errorMessage = 'Failed to send reset email. Please try again later.';
       toast.error("Request Failed", { description: errorMessage });
-      console.error("Password reset request failed:", err.response?.data || err);
     } finally {
       setIsLoading(false);
     }
@@ -59,10 +54,20 @@ const ResetPasswordForm: React.FC<ResetPasswordFormProps> = () => {
           </div>
         </CardContent>
         <CardFooter className="flex flex-col space-y-2">
-          <Button type="submit" className="w-full" disabled={isLoading}>
+          <Button 
+            type="submit" 
+            variant="outline"
+            className="w-full text-primary border-primary hover:bg-primary/10 cursor-pointer transform transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] hover:shadow-md" 
+            disabled={isLoading}
+          >
             {isLoading ? 'Sending...' : 'Send Reset Link'}
           </Button>
-          <Button variant="link" size="sm" asChild>
+          <Button 
+            variant="link" 
+            size="sm" 
+            className="text-primary hover:text-primary/80 cursor-pointer transform transition-all duration-300 hover:scale-[1.02]" 
+            asChild
+          >
             <Link to="/login">Back to Login</Link>
           </Button>
         </CardFooter>

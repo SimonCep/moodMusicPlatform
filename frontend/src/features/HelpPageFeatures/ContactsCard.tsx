@@ -21,7 +21,6 @@ const ContactsCard: React.FC = () => {
                     <span className="text-sm font-semibold text-card-foreground">Email: </span>
                     <span className="text-sm text-card-foreground/90">moodmusicplatform@gmail.com</span>
                 </div>
-                {/* TODO: Add more contact info or a contact form link */}
             </CardContent>
         </Card>
     );

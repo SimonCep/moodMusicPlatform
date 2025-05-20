@@ -2,8 +2,6 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { createMoodAndGetPlaylist } from '../services/api';
-import { MoodPlaylistResponse } from '../types'; // Assuming MoodPlaylistResponse includes playlist_quality_metrics
-// import { useAuth } from '../context/AuthContext'; // Will be needed for isLoading, etc.
 
 export interface MoodFormState {
   moodInput: string;
@@ -15,8 +13,6 @@ export interface MoodFormState {
   playlistGoal: string;
   isLoadingPlaylist: boolean;
   showFaceScanPopup: boolean;
-  // Removed unused playlistDisclaimer state from interface
-  // playlistDisclaimer: string | null;
 }
 
 export interface MoodFormHandlers {
@@ -43,11 +39,8 @@ export const useMoodForm = () => {
   const [playlistGoal, setPlaylistGoal] = useState('');
   const [isLoadingPlaylist, setIsLoadingPlaylist] = useState(false);
   const [showFaceScanPopup, setShowFaceScanPopup] = useState(false);
-  // Removed unused playlistDisclaimer state
-  // const [playlistDisclaimer, setPlaylistDisclaimer] = useState<string | null>(null); 
   
   const navigate = useNavigate();
-  // const { isLoading: isAuthLoading } = useAuth(); // Placeholder for auth loading
 
   const handleScanFaceClick = () => {
     setShowFaceScanPopup(true);
@@ -59,8 +52,8 @@ export const useMoodForm = () => {
 
   const handleEmotionFromScan = (description: string) => {
     setDetectedEmotion(description.trim());
-    setMoodInput(''); // Clear manual mood input when emotion is detected
-    setShowFaceScanPopup(false); // Close popup after detection
+    setMoodInput('');
+    setShowFaceScanPopup(false);
   };
 
   const handleSubmitMood = async () => {
@@ -74,9 +67,7 @@ export const useMoodForm = () => {
     }
 
     setIsLoadingPlaylist(true);
-    // Removed setPlaylistDisclaimer(null);
     try {
-      // Changed back to not needing the response data variable here
       await createMoodAndGetPlaylist(
         moodInput, 
         energyLevel[0], 
@@ -93,7 +84,6 @@ export const useMoodForm = () => {
       navigate('/playlists', { replace: true });
 
     } catch (err: any) {
-      // console.error removed
       toast.error("Playlist Generation Failed", {
         description: err.response?.data?.detail || err.message || "Please try again."
       });
@@ -113,7 +103,6 @@ export const useMoodForm = () => {
       playlistGoal,
       isLoadingPlaylist,
       showFaceScanPopup,
-      // Removed playlistDisclaimer from returned values
     },
     handlers: {
       setMoodInput,
@@ -128,6 +117,5 @@ export const useMoodForm = () => {
       handleEmotionFromScan,
       handleSubmitMood,
     },
-    // Removed isAuthLoading // export if needed by the page
   };
 }; 

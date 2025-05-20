@@ -5,10 +5,10 @@ from django.utils import timezone
 class MoodModel(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='moods')
     mood_text = models.TextField()
-    energy_level = models.IntegerField(default=5)  # Scale of 1-10
+    energy_level = models.IntegerField(default=5)
     timestamp = models.DateTimeField(default=timezone.now)
-    season = models.CharField(max_length=20)  # Could be auto-calculated based on timestamp
-    category = models.CharField(max_length=50, default='Other', blank=True) # Store the determined category
+    season = models.CharField(max_length=20)
+    category = models.CharField(max_length=50, default='Other', blank=True)
     
     def __str__(self):
         return f"{self.user.username}'s mood: {self.mood_text[:20]}..."
@@ -25,8 +25,8 @@ class Playlist(models.Model):
     name = models.CharField(max_length=200, default="My Mood Playlist")
     created_at = models.DateTimeField(default=timezone.now)
     prompt_used = models.TextField()
-    llm_fallback_count = models.IntegerField(default=0)     # New field: count of tracks not found on Spotify
-    total_tracks_generated = models.IntegerField(default=0) # New field: total tracks initially generated
+    llm_fallback_count = models.IntegerField(default=0)
+    total_tracks_generated = models.IntegerField(default=0)
     
     def __str__(self):
         return f"{self.name} (User: {self.mood.user.username}) - {self.created_at.strftime('%Y-%m-%d %H:%M')}"

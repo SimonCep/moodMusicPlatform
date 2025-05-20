@@ -1,7 +1,5 @@
-// components/PlaylistDisplay.tsx
 import React from 'react';
 import { Playlist } from '../types';
-// Fix imports to use relative paths
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
 import { Avatar, AvatarFallback } from "../components/ui/avatar";
 import { Separator } from "../components/ui/separator";

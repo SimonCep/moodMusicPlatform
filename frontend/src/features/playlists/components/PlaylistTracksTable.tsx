@@ -14,7 +14,7 @@ import { UseTrackPreviewReturn } from '../hooks/useTrackPreview';
 
 interface PlaylistTracksTableProps {
     playlist: Playlist;
-    tracksToDisplay: Track[]; // These could be original or reordered tracks
+    tracksToDisplay: Track[];
     reorderModeActiveForCurrentPlaylist: boolean;
     onMoveTrack: (trackId: string, direction: 'up' | 'down') => void;
     trackPreviewHook: UseTrackPreviewReturn;
@@ -47,7 +47,6 @@ const PlaylistTracksTable: React.FC<PlaylistTracksTableProps> = ({
         );
     }
 
-    // Ensure tracksToDisplay is sorted if it hasn't been already by the parent
     const sortedTracksToDisplay = [...tracksToDisplay].sort((a, b) => a.order_in_playlist - b.order_in_playlist);
 
     return (
@@ -81,19 +80,19 @@ const PlaylistTracksTable: React.FC<PlaylistTracksTableProps> = ({
                                                 variant="ghost" size="icon"
                                                 onClick={() => onMoveTrack(trackKey, 'up')}
                                                 disabled={trackIndex === 0}
-                                                className="disabled:opacity-30 hover:bg-transparent"
+                                                className="disabled:opacity-30 hover:bg-transparent cursor-pointer transition-all duration-300 hover:scale-110"
                                                 title="Move Up"
                                             >
-                                                <ArrowUpCircle size={18} />
+                                                <ArrowUpCircle size={18} className="opacity-70 hover:opacity-100 transition-opacity" />
                                             </Button>
                                             <Button
                                                 variant="ghost" size="icon"
                                                 onClick={() => onMoveTrack(trackKey, 'down')}
                                                 disabled={trackIndex === arr.length - 1}
-                                                className="disabled:opacity-30 hover:bg-transparent"
+                                                className="disabled:opacity-30 hover:bg-transparent cursor-pointer transition-all duration-300 hover:scale-110"
                                                 title="Move Down"
                                             >
-                                                <ArrowDownCircle size={18} />
+                                                <ArrowDownCircle size={18} className="opacity-70 hover:opacity-100 transition-opacity" />
                                             </Button>
                                         </TableCell>
                                     )}
@@ -111,20 +110,22 @@ const PlaylistTracksTable: React.FC<PlaylistTracksTableProps> = ({
                                             <span className="inline-flex items-center space-x-1">
                                                 <Badge variant="outline" className="text-green-700 bg-green-100 border-green-200 dark:text-green-300 dark:bg-green-800/50 dark:border-green-700/60 text-xs font-medium">Loaded</Badge>
                                                 <Button
-                                                    variant="ghost" size="icon" className="h-8 w-8"
+                                                    variant="ghost" size="icon"
                                                     onClick={() => handleToggleTrackFrame(playlistKey, trackKey)}
+                                                    className="h-8 w-8 cursor-pointer transition-all duration-300 hover:scale-110"
                                                     title={isActiveFrame ? "Close Preview" : "Play Preview"}
                                                 >
-                                                    {isActiveFrame ? <XCircle className="h-5 w-5" /> : <PlayCircle className="h-5 w-5" />}
+                                                    {isActiveFrame ? <XCircle className="h-5 w-5 opacity-70 hover:opacity-100 transition-opacity" /> : <PlayCircle className="h-5 w-5 opacity-70 hover:opacity-100 transition-opacity" />}
                                                 </Button>
                                             </span>
                                         ) : (
                                             <Button
-                                                variant="ghost" size="icon" className="h-8 w-8"
+                                                variant="ghost" size="icon"
                                                 onClick={() => handleLoadPreview(playlistKey, track)}
+                                                className="h-8 w-8 cursor-pointer transition-all duration-300 hover:scale-110"
                                                 title="Load Spotify Preview"
                                             >
-                                                <PlayCircle className="h-5 w-5 opacity-70 hover:opacity-100" />
+                                                <PlayCircle className="h-5 w-5 opacity-70 hover:opacity-100 transition-opacity" />
                                             </Button>
                                         )}
                                     </TableCell>
@@ -132,17 +133,17 @@ const PlaylistTracksTable: React.FC<PlaylistTracksTableProps> = ({
                                         <Button
                                             variant="ghost" size="icon"
                                             onClick={(e) => { e.stopPropagation(); onFeedbackClick(playlistKey, track); }}
-                                            className="text-primary hover:text-primary/80"
+                                            className="text-primary hover:text-primary/80 cursor-pointer transition-all duration-300 hover:scale-110"
                                             aria-label="Give feedback"
                                         >
-                                            <Search className="h-4 w-4" />
+                                            <Search className="h-4 w-4 opacity-70 hover:opacity-100 transition-opacity" />
                                         </Button>
                                     </TableCell>
                                     <TableCell className="text-right">
                                         <AlertDialog>
                                             <AlertDialogTrigger asChild>
-                                                <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive/80" aria-label="Remove track">
-                                                    <Trash2 size={18} />
+                                                <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive/80 cursor-pointer transition-all duration-300 hover:scale-110" aria-label="Remove track">
+                                                    <Trash2 size={18} className="opacity-70 hover:opacity-100 transition-opacity" />
                                                 </Button>
                                             </AlertDialogTrigger>
                                             <AlertDialogContent>

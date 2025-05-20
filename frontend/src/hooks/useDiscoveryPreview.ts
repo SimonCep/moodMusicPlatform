@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { toast } from 'sonner';
 import { searchSpotifyTrack } from '../services/spotify';
 import { SpecializedPlaylist } from '../types';
-import { DiscoveryAllPreviewsState, DiscoveryPreviewState } from '../types'; // Assuming these are now in types
+import { DiscoveryAllPreviewsState } from '../types';
 
 export const getSpotifyTrackIdFromUri = (uri: string | null | undefined): string | null => {
     if (!uri || !uri.startsWith('spotify:track:')) return null;
@@ -14,14 +14,12 @@ export const useDiscoveryPreview = (playlists: SpecializedPlaylist[]) => {
   const [activePreview, setActivePreview] = useState<{ playlistId: number; trackKey: string } | null>(null);
 
   useEffect(() => {
-    // Initialize or update preview states when playlists change
     const initialStates = playlists.reduce((acc, playlist) => {
       const playlistKey = String(playlist.id);
       acc[playlistKey] = {};
       if (playlist.cached_tracks) {
         playlist.cached_tracks.forEach((track, index) => {
           const trackKey = String(track.id != null ? track.id : index);
-          // Preserve existing state if available, otherwise initialize
           acc[playlistKey][trackKey] = discoveryPreviewStates[playlistKey]?.[trackKey] || { uri: null, loading: false };
         });
       }
@@ -29,7 +27,7 @@ export const useDiscoveryPreview = (playlists: SpecializedPlaylist[]) => {
     }, {} as DiscoveryAllPreviewsState);
     setDiscoveryPreviewStates(initialStates);
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [playlists]); // Rerun when playlists array reference changes
+  }, [playlists]);
 
   const handleLoadDiscoveryPreview = useCallback(async (playlistId: number, trackKey: string, title: string, artist: string) => {
     const playlistKeyStr = String(playlistId);
@@ -71,7 +69,7 @@ export const useDiscoveryPreview = (playlists: SpecializedPlaylist[]) => {
         }));
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activePreview]); // Added activePreview as a dependency, might need refinement
+  }, [activePreview]);
 
   const handleTogglePreview = useCallback((playlistId: number, trackKey: string, spotifyTrackIdFromUri?: string | null) => {
     if (!spotifyTrackIdFromUri) { 
@@ -92,6 +90,6 @@ export const useDiscoveryPreview = (playlists: SpecializedPlaylist[]) => {
     activePreview,
     handleLoadDiscoveryPreview,
     handleTogglePreview,
-    getSpotifyTrackIdFromUri // Exporting this as it's used for display logic in the component
+    getSpotifyTrackIdFromUri
   };
 }; 

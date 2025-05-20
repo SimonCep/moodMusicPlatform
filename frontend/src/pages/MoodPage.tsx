@@ -64,7 +64,7 @@ const MoodPage: React.FC = () => {
                             <Input 
                                 id="mood-input" 
                                 placeholder="e.g., Happy, Energetic, Calm... or use Face Scan" 
-                                className="bg-input/50" 
+                                className="bg-input/50 cursor-pointer" 
                                 value={moodInput}
                                 onChange={(e) => setMoodInput(e.target.value)}
                             />
@@ -87,7 +87,7 @@ const MoodPage: React.FC = () => {
                         <Textarea 
                             id="playlist-goal" 
                             placeholder="e.g., For a focused work session, for a relaxing evening..." 
-                            className="bg-input/50" 
+                            className="bg-input/50 resize-none h-24 border-primary cursor-pointer" 
                             value={playlistGoal}
                             onChange={(e) => setPlaylistGoal(e.target.value)}
                         />
@@ -101,7 +101,7 @@ const MoodPage: React.FC = () => {
                             step={1}
                             value={energyLevel}
                             onValueChange={setEnergyLevel}
-                            className="pt-2"
+                            className="pt-2 cursor-pointer"
                         />
                      </div>
                      <div className="space-y-2">
@@ -113,7 +113,7 @@ const MoodPage: React.FC = () => {
                             step={1}
                             value={songCount}
                             onValueChange={setSongCount}
-                            className="pt-2"
+                            className="pt-2 cursor-pointer"
                         />
                      </div>
                      <div className="space-y-1.5">
@@ -127,19 +127,29 @@ const MoodPage: React.FC = () => {
                          />
                      </div>
                      <div className="text-center pt-4">
-                        <Button variant="outline" className="w-full sm:w-auto" onClick={handleScanFaceClick} disabled={!!detectedEmotion}>
-                            <Camera className="mr-2 h-4 w-4" /> 
-                            {detectedEmotion ? "Face Scan Used" : "Or Scan Your Face"}
+                        <Button 
+                            variant="outline" 
+                            className="w-full sm:w-auto border-primary bg-card/80 hover:bg-primary/10 cursor-pointer transition-all duration-300 hover:scale-105 relative overflow-hidden group" 
+                            onClick={handleScanFaceClick} 
+                            disabled={!!detectedEmotion}
+                        >
+                            <span className="absolute inset-0 bg-primary/5 transform translate-y-full group-hover:translate-y-0 transition-transform duration-300"></span>
+                            <Camera className="mr-2 h-4 w-4 relative z-10 text-primary" /> 
+                            <span className="relative z-10 text-primary">{detectedEmotion ? "Face Scan Used" : "Or Scan Your Face"}</span>
                         </Button>
                      </div>
                 </CardContent>
                 <CardFooter className="flex flex-col sm:flex-row justify-center gap-2">
                      <Button 
-                        className="w-full sm:w-auto"
+                        variant="outline"
+                        className="w-full sm:w-auto border-primary hover:bg-primary/10 cursor-pointer transition-all duration-300 hover:scale-105 relative overflow-hidden group"
                         onClick={handleSubmitMood} 
                         disabled={isLoadingPlaylist || isAuthContextLoading}
                     >
-                        {isLoadingPlaylist ? 'Generating Playlist...' : 'Generate Playlist'}
+                        <span className="absolute inset-0 bg-primary/5 transform translate-y-full group-hover:translate-y-0 transition-transform duration-300"></span>
+                        <span className="relative z-10">
+                            {isLoadingPlaylist ? 'Generating Playlist...' : 'Generate Playlist'}
+                        </span>
                     </Button>
                 </CardFooter>
             </Card>

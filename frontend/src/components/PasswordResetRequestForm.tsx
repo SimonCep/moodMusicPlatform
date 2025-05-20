@@ -21,9 +21,7 @@ const PasswordResetRequestForm = () => {
             setIsSubmitted(true);
             toast.success("If an account exists with this email, you will receive password reset instructions.");
         } catch (err: any) {
-            // For security reasons, we don't want to reveal if the email exists or not
             toast.success("If an account exists with this email, you will receive password reset instructions.");
-            console.error("Password reset request error:", err);
         } finally {
             setIsLoading(false);
         }

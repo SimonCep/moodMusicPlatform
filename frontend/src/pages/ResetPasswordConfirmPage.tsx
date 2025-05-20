@@ -39,7 +39,6 @@ const ResetPasswordConfirmPage: React.FC = () => {
     );
   }
 
-  // Render the form only if uidb64 and token are present
   return (
     <div className="flex flex-col items-center justify-center min-h-screen animated-gradient p-4">
       <BackgroundParticles />

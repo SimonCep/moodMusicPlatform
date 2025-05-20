@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { requestPasswordReset } from '../../services/api'; // Assume this will be created
+import { requestPasswordReset } from '../../services/api';
 import { toast } from 'sonner';
 
 const ForgotPassword: React.FC = () => {
     const [email, setEmail] = useState('');
     const [isLoading, setIsLoading] = useState(false);
-    const [message, setMessage] = useState(''); // To show success/error message
+    const [message, setMessage] = useState('');
     const [error, setError] = useState('');
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -15,17 +15,16 @@ const ForgotPassword: React.FC = () => {
         setMessage('');
         setError('');
         try {
-            await requestPasswordReset(email); // Call the API function
+            await requestPasswordReset(email);
             setMessage('If an account with that email exists, a password reset link has been sent. Please check your inbox and spam folder.');
             toast.success('Password reset email sent', { 
                  description: 'Please check your inbox and spam folder.' 
             });
-            setEmail(''); // Clear email field on success
+            setEmail('');
         } catch (err: any) {
             const errorMessage = err.response?.data?.detail || err.response?.data?.email?.[0] || 'Failed to send reset email. Please try again.';
             setError(errorMessage);
             toast.error(errorMessage);
-            console.error("Password reset request failed:", err);
         } finally {
             setIsLoading(false);
         }

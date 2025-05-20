@@ -1,4 +1,3 @@
-// Define categories and colors
 export const moodCategories = {
     Happy: { keywords: [], color: "#22c55e" }, 
     Sad: { keywords: [], color: "#3b82f6" }, 
@@ -13,5 +12,4 @@ export const moodCategories = {
     Neutral: { keywords: [], color: "#a1a1aa" }
 };
 
-// Correct the type to include 'Other' instead of 'Other'
-export type MoodCategoryName = keyof typeof moodCategories; // This now correctly includes "Other" 
+export type MoodCategoryName = keyof typeof moodCategories;

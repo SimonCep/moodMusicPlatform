@@ -5,7 +5,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Loader2, Lightbulb, MessageSquareWarning } from 'lucide-react';
 import { Mood } from '@/types';
 import { cn } from "@/lib/utils";
-import { useMoodAdvice } from '@/hooks/useMoodAdvice'; // Internal hook usage
+import { useMoodAdvice } from '@/hooks/useMoodAdvice';
 import { MoodCategoryName, moodCategories } from '@/data/moodConfig';
 import { getMoodSentiment } from '@/utils/moodUtils';
 import { formatDate } from '@/utils/dateUtils';
@@ -32,14 +32,13 @@ const DetailedMoodEntriesSection: React.FC<DetailedMoodEntriesSectionProps> = ({
 
     return (
         <div>
-            <h3 className="text-xl font-semibold mb-4 text-center">Detailed Mood Entries</h3>
+            <h3 className="text-xl font-semibold mb-6 text-center">Detailed Mood Entries</h3>
             <Accordion type="single" collapsible className="w-full">
                 {accordionMoodData.map((mood) => {
                     const categoryName = mood.category && mood.category in moodCategories
                         ? mood.category as MoodCategoryName
                         : 'Neutral';
                     const sentiment = getMoodSentiment(categoryName);
-                    
                     let sentimentClasses = 'bg-zinc-50 dark:bg-zinc-800/20';
                     let textClasses = 'text-zinc-700 dark:text-zinc-400';
 
@@ -55,12 +54,12 @@ const DetailedMoodEntriesSection: React.FC<DetailedMoodEntriesSectionProps> = ({
                     else if (categoryName === 'Romantic') { sentimentClasses = 'bg-pink-50 dark:bg-pink-900/30'; textClasses = 'text-pink-700 dark:text-pink-400'; }
 
                     return (
-                        <AccordionItem value={`mood-${mood.id}`} key={mood.id} className={cn(sentimentClasses, 'rounded-md mb-2 border')}>
-                            <AccordionTrigger className="hover:no-underline px-4 py-3">
+                        <AccordionItem value={`mood-${mood.id}`} key={mood.id} className={cn(sentimentClasses, 'rounded-md mb-2 border group cursor-pointer transition-all duration-300 hover:scale-[1.01] relative')}>
+                            <AccordionTrigger className="hover:no-underline px-4 py-3 cursor-pointer transition-all duration-300 hover:bg-accent/10 data-[state=open]:bg-accent/5">
                                 <div className="flex flex-col sm:flex-row justify-between w-full items-start sm:items-center">
-                                    <div className="flex items-center">
-                                        <MoodIcon categoryName={categoryName} />
-                                        <p className={cn("font-semibold text-base", textClasses)}>
+                                    <div className="flex items-center gap-3">
+                                        <MoodIcon categoryName={categoryName} className="transition-transform duration-300 group-hover:scale-110 h-5 w-5" />
+                                        <p className={cn("font-semibold text-base transition-colors duration-300", textClasses)}>
                                             {mood.mood_text}
                                         </p>
                                     </div>
@@ -70,19 +69,19 @@ const DetailedMoodEntriesSection: React.FC<DetailedMoodEntriesSectionProps> = ({
                                     </div>
                                 </div>
                             </AccordionTrigger>
-                            <AccordionContent className="pt-2 pb-4 px-4 space-y-4 border-t border-border">
+                            <AccordionContent className="px-4 overflow-hidden transition-all duration-300 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0">
                                 {sentiment === 'negative' && (
                                     <Button
                                         onClick={() => handleGetAdvice(mood)}
                                         disabled={isLoadingAdvice && selectedMoodIdForAdvice === mood.id}
                                         size="sm"
                                         variant="outline"
-                                        className="w-full sm:w-auto"
+                                        className="w-full sm:w-auto cursor-pointer transition-all duration-300 hover:scale-[1.02] border border-primary bg-card/80 hover:bg-card/60 mt-4 mb-2"
                                     >
                                         {isLoadingAdvice && selectedMoodIdForAdvice === mood.id ? (
                                             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                                         ) : (
-                                            <Lightbulb className="mr-2 h-4 w-4" />
+                                            <Lightbulb className="mr-2 h-4 w-4 transition-colors duration-300" />
                                         )}
                                         Get Tailored Advice for this Mood
                                     </Button>

@@ -1,7 +1,5 @@
 @import url('https://api.fontshare.com/v2/css?f[]=switzer@600,700,400,500&display=swap');
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 
 @layer base {
   :root {
@@ -84,10 +82,10 @@
 
 @layer base {
   * {
-    @apply border-border;
+    @apply border-[hsl(var(--border))];
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-[hsl(var(--background))] text-[hsl(var(--foreground))];
   }
 }
 
@@ -158,10 +156,18 @@
   div[class*="-MenuPortal"] {
     z-index: 9999 !important;
   }
+  
 
   .glass-card {
     background: rgba(255, 255, 255, 0.15);
     backdrop-filter: blur(8px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.3);
     box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.2);
+  }
+  
+  .glass-card input,
+  .glass-card textarea,
+  .glass-card select {
+  background-color: hsl(var(--background) / 0.8);
+  border: 1px solid hsl(var(--border));
   }

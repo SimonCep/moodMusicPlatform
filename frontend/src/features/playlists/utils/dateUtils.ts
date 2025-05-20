@@ -4,7 +4,6 @@ export const formatPlaylistDate = (dateString: string): string => {
             year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit'
         });
     } catch (e) {
-        // console.warn("Error formatting date:", dateString, e); // Optional: for debugging
-        return "Invalid Date"; // Return a more informative fallback
+        return "Invalid Date";
     }
 }; 

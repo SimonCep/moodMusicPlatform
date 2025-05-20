@@ -115,10 +115,10 @@ REST_FRAMEWORK = {
         'rest_framework.throttling.UserRateThrottle'
     ],
     'DEFAULT_THROTTLE_RATES': {
-        'anon': '100/day',    # Limit anonymous users to 100 requests per day
-        'user': '1000/day',   # Limit authenticated users to 1000 requests per day
-        'auth_login': '5/minute',  # Limit login attempts
-        'password_reset': '3/hour'  # Limit password reset requests
+        'anon': '100/day', 
+        'user': '1000/day',
+        'auth_login': '5/minute',
+        'password_reset': '3/hour'
     }
 }
 
@@ -168,6 +168,6 @@ EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', 'moodmusicplatform@gmail.com') 
-EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD') # Read from environment
-DEFAULT_FROM_EMAIL = EMAIL_HOST_USER # Usually same as host user for Gmail
-FRONTEND_URL = os.environ.get('FRONTEND_URL', 'http://localhost:3000')
+EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+FRONTEND_URL = os.environ.get('FRONTEND_URL', 'https://localhost:3000')

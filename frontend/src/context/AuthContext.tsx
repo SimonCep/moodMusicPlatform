@@ -27,7 +27,6 @@ export const AuthProvider: React.FC<{children: ReactNode}> = ({ children }) => {
       setIsAuthenticated(true);
       return true;
     } catch (error) {
-      console.error("Failed to fetch user profile in AuthContext:", error);
       setUser(null);
       setIsAuthenticated(false);
       localStorage.removeItem('accessToken');
@@ -63,7 +62,6 @@ export const AuthProvider: React.FC<{children: ReactNode}> = ({ children }) => {
         throw new Error("Login succeeded but failed to fetch user profile.");
       }
     } catch (error) {
-      console.error('Login failed in AuthContext:', error);
       apiLogout();
       throw error;
     } finally {
@@ -76,7 +74,6 @@ export const AuthProvider: React.FC<{children: ReactNode}> = ({ children }) => {
     try {
         await apiRegister(userData);
     } catch (error) {
-        console.error('Registration failed in AuthContext:', error);
         apiLogout();
         throw error;
     } finally {

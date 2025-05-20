@@ -1,22 +1,16 @@
 import React from 'react';
 import { Outlet } from 'react-router-dom';
-import NavBar from './NavBar'; // Assuming NavBar is in the same directory
-import { BackgroundParticles } from './BackgroundParticles'; // Assuming this is used for the background
-// Toaster is likely handled globally in App.tsx
-// import { Toaster } from "sonner";
+import NavBar from './NavBar';
+import { BackgroundParticles } from './BackgroundParticles';
 
 const MainLayout: React.FC = () => {
   return (
     <div className="flex flex-col min-h-screen animated-gradient text-foreground">
-      <BackgroundParticles /> {/* Keep particles if desired */}
-      {/* NavBar will now include the Logout button */}
+      <BackgroundParticles />
       <NavBar />
-      {/* Re-added 'container' and 'mx-auto' for centered max-width content */}
       <main className="flex-grow container mx-auto px-4 py-8">
-        <Outlet /> {/* Renders the active page component */}
+        <Outlet />
       </main>
-      {/* Toaster might be better placed globally in App.tsx or here, depending on need */}
-      {/* <Toaster /> */}
     </div>
   );
 };

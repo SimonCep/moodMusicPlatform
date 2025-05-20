@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { DateRange } from 'react-day-picker';
-import { getMoodHistory } from '@/services/api'; // Assuming api services are in @/services
+import { getMoodHistory } from '@/services/api';
 import { Mood } from '@/types';
 import { toast } from 'sonner';
 import { moodCategories, MoodCategoryName } from '@/data/moodConfig';
@@ -11,7 +11,7 @@ export const useMoodReportData = () => {
     const [isLoadingHistory, setIsLoadingHistory] = useState(true);
     const [errorHistory, setErrorHistory] = useState<string | null>(null);
     const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
-    const [isLoadingDataPDF, setIsLoadingDataPDF] = useState(false); // For PDF button state
+    const [isLoadingDataPDF, setIsLoadingDataPDF] = useState(false);
 
     useEffect(() => {
         const fetchHistory = async () => {
@@ -21,7 +21,6 @@ export const useMoodReportData = () => {
                 const history = await getMoodHistory(); 
                 setMoodHistory(history);
             } catch (err: any) {
-                console.error("Error fetching mood history:", err);
                 const errorMessage = err.response?.data?.detail || err.message || "Failed to load mood history.";
                 setErrorHistory(errorMessage);
                 toast.error("Error Loading History", { description: errorMessage });
@@ -86,24 +85,24 @@ export const useMoodReportData = () => {
             energyLevel: mood.energy_level,
             fullDate: formatDate(mood.timestamp, 'long'),
             moodText: mood.mood_text,
-            timestamp: mood.timestamp // Keep original timestamp for PDF sorting if needed
+            timestamp: mood.timestamp
         })),
         [chartMoodData]
     );
 
     return {
-        moodHistory, // Raw history, might not be needed by page directly if using processed data
+        moodHistory,
         isLoadingHistory,
         errorHistory,
         dateRange,
         setDateRange,
         filteredMoods,
-        chartMoodData, // For PDF/CSV and EnergyChart
-        accordionMoodData, // For DetailedEntries and PDF/CSV
-        moodDistributionData, // For PieChart and PDF/CSV
+        chartMoodData,
+        accordionMoodData,
+        moodDistributionData,
         totalMoodCountForPie,
-        chartDisplayData, // For EnergyChart
-        isLoadingDataPDF, // For PDF button state management
-        setIsLoadingDataPDF // For PDF button state management
+        chartDisplayData,
+        isLoadingDataPDF,
+        setIsLoadingDataPDF 
     };
 }; 

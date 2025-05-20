@@ -24,7 +24,6 @@ const ResetPasswordConfirmForm: React.FC<ResetPasswordConfirmFormProps> = ({ uid
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Client-side password validation
     const passwordRequirements = [
       { test: newPassword1.length >= 8, message: "Password must be at least 8 characters long." },
       { test: /[A-Z]/.test(newPassword1), message: "Password must contain at least one uppercase letter." },
@@ -77,7 +76,6 @@ const ResetPasswordConfirmForm: React.FC<ResetPasswordConfirmFormProps> = ({ uid
       }
 
       toast.error("Password Reset Failed", { description: errorMessage.replace(/\n/g, '; ') });
-      console.error("Password reset confirmation failed:", errorData || err);
     } finally {
       setIsLoading(false);
     }
@@ -133,10 +131,20 @@ const ResetPasswordConfirmForm: React.FC<ResetPasswordConfirmFormProps> = ({ uid
           </div>
         </CardContent>
         <CardFooter className="flex flex-col space-y-2">
-          <Button type="submit" className="w-full" disabled={isLoading}>
+          <Button 
+            type="submit" 
+            variant="outline"
+            className="w-full text-primary border-primary hover:bg-primary/10 cursor-pointer transform transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] hover:shadow-md" 
+            disabled={isLoading}
+          >
             {isLoading ? 'Setting Password...' : 'Set New Password'}
           </Button>
-          <Button variant="link" size="sm" asChild>
+          <Button 
+            variant="link" 
+            size="sm" 
+            className="text-primary hover:text-primary/80 cursor-pointer transform transition-all duration-300 hover:scale-[1.02]" 
+            asChild
+          >
             <Link to="/login">Back to Login</Link>
           </Button>
         </CardFooter>

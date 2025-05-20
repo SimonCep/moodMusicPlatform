@@ -9,8 +9,10 @@ export default {
   			happy: '#FFD700',
   			melancholy: '#4682B4',
   			energetic: '#FF4500',
-  			background: 'hsl(var(--background))',
-  			foreground: 'hsl(var(--foreground))',
+  			background: {
+  				DEFAULT: 'hsl(var(--background))',
+  				foreground: 'hsl(var(--foreground))'
+  			},
   			card: {
   				DEFAULT: 'hsl(var(--card))',
   				foreground: 'hsl(var(--card-foreground))'

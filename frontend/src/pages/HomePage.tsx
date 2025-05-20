@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { quotes, Quote } from '@/data/quotes'; // Import quotes and Quote interface
-import FeatureCard from '@/components/FeatureCard'; // Import FeatureCard
-import { Compass, BarChartHorizontalBig, AreaChart, ListMusic } from 'lucide-react'; // Import icons
+import { quotes, Quote } from '@/data/quotes';
+import FeatureCard from '@/components/FeatureCard';
+import { Compass, BarChartHorizontalBig, AreaChart, ListMusic } from 'lucide-react';
 
 const HomePage: React.FC = () => {
   const [currentQuote, setCurrentQuote] = useState<Quote | null>(null);
@@ -50,7 +50,6 @@ const HomePage: React.FC = () => {
         Your personalized mood and music experience awaits. Discover new tracks, understand your emotional patterns, and see how music influences your day.
       </p>
 
-      {/* Sound Reflection Section */}
       {currentQuote && (
         <div className="pt-2 pb-6 md:pb-8 w-full max-w-3xl text-center">
           <p className="italic text-gray-200 [text-shadow:_0_1px_2px_rgb(0_0_0_/_0.2)] text-lg md:text-xl">

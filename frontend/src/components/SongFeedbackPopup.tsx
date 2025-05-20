@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import {
@@ -36,12 +35,6 @@ const SongFeedbackPopup: React.FC<SongFeedbackPopupProps> = ({
     if (open) {
         setRating(0);
         setComment("");
-    } else {
-         // Optional: Delay reset slightly if needed for animations
-         // setTimeout(() => {
-         //   setRating(0);
-         //   setComment("");
-         // }, 150);
     }
   }, [open]);
 
@@ -51,7 +44,6 @@ const SongFeedbackPopup: React.FC<SongFeedbackPopupProps> = ({
 
   const handleSubmit = () => {
     if (rating === 0) {
-        console.warn("Rating is required to submit feedback.");
         return; 
     }
     onSubmit(rating, comment);

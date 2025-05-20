@@ -4,6 +4,7 @@ import { Button } from "../components/ui/button";
 import { Slider } from "../components/ui/slider";
 import { Textarea } from "../components/ui/textarea";
 import GenreSelector from './GenreSelector';
+import { Loader2 } from "lucide-react";
 
 interface MoodInputProps {
   onSubmit: (moodText: string, energyLevel: number, genre: string) => void;
@@ -13,7 +14,7 @@ interface MoodInputProps {
 const MoodInput: React.FC<MoodInputProps> = ({ onSubmit, isLoading }) => {
   const [moodText, setMoodText] = useState('');
   const [energyLevel, setEnergyLevel] = useState(5);
-  const [selectedGenre, setSelectedGenre] = useState('pop'); // Default genre
+  const [selectedGenre, setSelectedGenre] = useState('pop');
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -62,13 +63,20 @@ const MoodInput: React.FC<MoodInputProps> = ({ onSubmit, isLoading }) => {
             </div>
           </div>
 
-          <Button
-            type="submit"
-            className="w-full mt-6"
-            disabled={isLoading}
-            variant={isLoading ? "outline" : "default"}
+          <Button 
+            type="submit" 
+            disabled={isLoading} 
+            variant="outline"
+            className="w-full mt-6 border-primary hover:bg-primary/10"
           >
-            {isLoading ? 'Generating Playlist...' : 'Generate My Playlist'}
+            {isLoading ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Generating Playlist...
+              </>
+            ) : (
+              'Generate Playlist'
+            )}
           </Button>
         </form>
       </CardContent>

@@ -24,17 +24,11 @@ from spotipy.oauth2 import SpotifyClientCredentials
 import geoip2.database
 from geoip2.errors import AddressNotFoundError
 
-logger = logging.getLogger(__name__) # Define logger early
+logger = logging.getLogger(__name__)
 
-# --- Globals / Constants ---
-# It's better to initialize the GeoIP reader once when the app starts,
-# but for simplicity in this example, we might open it in the view.
-# A more robust solution would use Django settings for the path.
-GEOIP_DATABASE_PATH = '/app/geoip_data/GeoLite2-Country.mmdb' # Update this path if needed
+GEOIP_DATABASE_PATH = '/app/geoip_data/GeoLite2-Country.mmdb'
 geoip_reader = None
 try:
-    # Attempt to load the GeoIP database when the module is loaded.
-    # Ensure the database file is present at GEOIP_DATABASE_PATH inside your container.
     geoip_reader = geoip2.database.Reader(GEOIP_DATABASE_PATH)
 except FileNotFoundError:
     logger.warning(f"GeoIP2 database not found at {GEOIP_DATABASE_PATH}. IP-based market detection will be disabled.")
@@ -42,7 +36,6 @@ except Exception as e:
     logger.error(f"Error loading GeoIP2 database: {e}", exc_info=True)
 
 client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
-# logger = logging.getLogger(__name__) # No longer needed here, moved up
 
 MOOD_CATEGORIES_LIST = [
     "Happy", "Sad", "Angry", "Calm", "Excited", "Anxious", 
@@ -108,7 +101,6 @@ def create_mood_and_playlist(request):
     logger.info(f"Using text for categorization: '{text_for_mood_tracking}'. Categorized as: {mood_category}")
 
     market_code_for_spotify = None
-    # 1. Try to determine market code from favorite_genre keywords
     if favorite_genre and isinstance(favorite_genre, str):
         genre_lower = favorite_genre.lower()
         if "lithuanian" in genre_lower:
@@ -117,12 +109,9 @@ def create_mood_and_playlist(request):
             market_code_for_spotify = "PL"
         elif "japanese" in genre_lower or "j-pop" in genre_lower or "j-rock" in genre_lower:
             market_code_for_spotify = "JP"
-        # Add more genre-to-market mappings as needed
 
-    # 2. If not found from genre, try to determine from user's IP address
     if not market_code_for_spotify and geoip_reader:
         try:
-            # Get client IP address
             x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
             if x_forwarded_for:
                 ip_address = x_forwarded_for.split(',')[0].strip()
@@ -193,8 +182,7 @@ def create_mood_and_playlist(request):
         f"and they prefer {favorite_genre} music. "
     ]
 
-    # Refine prompt for regional music
-    if market_code_for_spotify: # If a specific market is identified
+    if market_code_for_spotify:
         prompt_parts.append(
             f"The user has indicated a preference for music from the region associated with market code '{market_code_for_spotify}'. "
             f"Please prioritize songs that are verifiably available on major streaming platforms within this market. "
@@ -221,7 +209,6 @@ def create_mood_and_playlist(request):
         playlist_name = playlist_data.get('playlist_name', f"Mood Playlist ({text_for_mood_tracking[:20]}...)") 
         tracks_data = playlist_data.get('tracks', []) 
 
-        # Process tracks first to determine fallback status
         processed_tracks_data = []
         verified_on_spotify_count = 0
         llm_fallback_count = 0
@@ -257,7 +244,6 @@ def create_mood_and_playlist(request):
             else:
                 logger.warning(f"Could not find Spotify details for: {original_title} - {original_artist}. Using LLM provided data.")
                 llm_fallback_count += 1
-                # Attempt to parse/normalize LLM duration
                 if track_info_to_save['duration'] and isinstance(track_info_to_save['duration'], str) and ':' not in track_info_to_save['duration']:
                     try:
                         total_seconds = int(track_info_to_save['duration'])
@@ -270,7 +256,6 @@ def create_mood_and_playlist(request):
             
             processed_tracks_data.append(track_info_to_save)
 
-        # Now create the Playlist instance with the final counts
         total_tracks_count = len(processed_tracks_data)
         playlist_instance = Playlist.objects.create(
             mood=mood_instance, 
@@ -280,7 +265,6 @@ def create_mood_and_playlist(request):
             total_tracks_generated=total_tracks_count
         )
         
-        # Now create the Track instances linked to the playlist
         created_tracks_instances = []
         for track_info in processed_tracks_data:
             track = Track.objects.create(
@@ -464,7 +448,6 @@ def replace_track_view(request, playlist_pk, track_pk):
         f"Return ONLY the JSON object for the single replacement song with keys 'title', 'artist', 'duration'."
     )
 
-    # Reverting to print statements due to persistent SyntaxError
     logger.debug("--- Replacement Prompt ---")
     logger.debug(prompt)
     logger.debug("--------------------------")
@@ -601,10 +584,6 @@ def reorder_playlist_tracks(request, playlist_pk):
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 def _search_spotify_for_track_details(title: str, artist: str, market_code: str | None = None):
-    """
-    Searches Spotify for a track by title and artist, optionally for a specific market.
-    Returns a dictionary with track details if found, otherwise None.
-    """
     client_id = os.environ.get('SPOTIPY_CLIENT_ID')
     client_secret = os.environ.get('SPOTIPY_CLIENT_SECRET')
 
@@ -618,14 +597,13 @@ def _search_spotify_for_track_details(title: str, artist: str, market_code: str 
 
         query = f"track:{title} artist:{artist}"
         logger.info(f"Searching Spotify with query: '{query}', market: '{market_code if market_code else 'None (default behavior)'}'")
-        results = sp.search(q=query, type='track', limit=1, market=market_code) # Use dynamic market_code
+        results = sp.search(q=query, type='track', limit=1, market=market_code)
 
         if results and results['tracks']['items']:
             track_item = results['tracks']['items'][0]
             
             duration_ms = track_item.get('duration_ms', 0)
             duration_seconds = duration_ms // 1000
-            # Corrected duration formatting to avoid issues like 01:05 vs 1:05
             minutes = duration_seconds // 60
             seconds = duration_seconds % 60
             duration_formatted = f"{minutes}:{seconds:02d}"
@@ -634,21 +612,19 @@ def _search_spotify_for_track_details(title: str, artist: str, market_code: str 
                 "title": track_item['name'],
                 "artist": ", ".join([a['name'] for a in track_item['artists']]),
                 "album": track_item['album']['name'],
-                "duration_ms": duration_ms, # Keep ms for potential future use
-                "duration": duration_formatted, # Formatted for display
+                "duration_ms": duration_ms,
+                "duration": duration_formatted,
                 "spotify_uri": track_item.get('uri')
             }
         else:
             logger.warning(f"Spotify search: No results found for title='{title}', artist='{artist}' with market '{market_code}'")
-            # Fallback: attempt search with just title if artist search fails or is too specific
             logger.info(f"Attempting Spotify search with title only: '{title}' with market '{market_code}'")
             results_title_only = sp.search(q=f"track:{title}", type='track', limit=5, market=market_code)
             if results_title_only and results_title_only['tracks']['items']:
-                # Basic attempt to match artist if multiple results
                 for item in results_title_only['tracks']['items']:
                     spotify_artists = [a['name'].lower() for a in item['artists']]
                     if artist.lower() in spotify_artists or any(artist.lower() in s_artist for s_artist in spotify_artists):
-                        track_item = item # Found a plausible match
+                        track_item = item 
                         duration_ms = track_item.get('duration_ms', 0)
                         duration_seconds = duration_ms // 1000
                         minutes = duration_seconds // 60
@@ -689,7 +665,6 @@ def find_and_add_spotify_track(request, playlist_pk):
             duration_seconds = duration_ms // 1000
             duration_formatted = f"{duration_seconds // 60:02d}:{duration_seconds % 60:02d}"
 
-            # Determine next order for the new track
             last_track = Track.objects.filter(playlist=playlist).order_by('-order_in_playlist').first()
             next_order = (last_track.order_in_playlist + 1) if last_track else 0
 
@@ -700,7 +675,7 @@ def find_and_add_spotify_track(request, playlist_pk):
                 album=spotify_track_details.get('album', 'N/A'),
                 duration=duration_formatted, 
                 spotify_uri=spotify_track_details.get('spotify_uri'),
-                order_in_playlist=next_order # Set the order for the new track
+                order_in_playlist=next_order
             )
             return Response(TrackSerializer(new_track).data, status=status.HTTP_201_CREATED)
         else:

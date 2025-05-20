@@ -26,7 +26,7 @@ const FeatureCard: React.FC<FeatureCardProps> = ({ icon, title, description, lin
       </CardHeader>
       <CardContent className="flex-grow flex flex-col justify-end mt-auto">
         <Link to={linkTo}>
-          <Button variant="outline" className="w-full text-primary border-primary hover:bg-primary/10">
+          <Button variant="outline" className="w-full text-primary border-primary hover:bg-primary/10 cursor-pointer transform transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] hover:shadow-md">
             {buttonText} <ArrowRight className="ml-2 h-4 w-4" />
           </Button>
         </Link>

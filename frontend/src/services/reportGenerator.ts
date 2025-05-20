@@ -3,28 +3,20 @@ import { DateRange } from 'react-day-picker';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
 import jsPDF from 'jspdf';
-import { formatDate } from '@/utils/dateUtils'; // Already created
-import { MoodCategoryName, moodCategories } from '@/data/moodConfig'; // Already created
+import { formatDate } from '@/utils/dateUtils';
+import { MoodCategoryName } from '@/data/moodConfig';
 
-// Data types expected by the PDF generator for its sections
 interface MoodDistributionDataItem {
     name: MoodCategoryName;
     value: number;
-    fill?: string; // Color for the mood category
+    fill?: string;
 }
 
 interface ChartMoodDataItem {
-    timestamp: string; // Keep original timestamp for sorting
+    timestamp: string;
     energy_level: number;
-    mood_text: string; // For PDF content
-    // name: string; // Formatted date for x-axis in chart - not directly needed in PDF in this format
-    // fullDate: string; // Formatted date for tooltip - not directly needed in PDF in this format
+    mood_text: string;
 }
-
-interface AccordionMoodDataItem extends Mood {
-    // Extends the base Mood type, which includes id, mood_text, energy_level, timestamp, category, season
-}
-
 
 export const exportMoodsToCSV = (filteredMoods: Mood[], dateRange?: DateRange) => {
     if (filteredMoods.length === 0) {
@@ -35,7 +27,7 @@ export const exportMoodsToCSV = (filteredMoods: Mood[], dateRange?: DateRange) =
     const headers = ["Timestamp", "Mood Text", "Category", "Energy Level", "Season"];
     const rows = filteredMoods.map(mood => [
         formatDate(mood.timestamp, 'long'),
-        `"${mood.mood_text.replace(/"/g, '""')}"`, // Corrected double quote escaping
+        `"${mood.mood_text.replace(/"/g, '""')}"`,
         mood.category || 'N/A',
         mood.energy_level,
         mood.season || 'N/A'
@@ -66,18 +58,16 @@ export const exportMoodsToCSV = (filteredMoods: Mood[], dateRange?: DateRange) =
 };
 
 export const generateDataPDF = async (
-    filteredMoods: Mood[], // Used for checking if data exists
-    accordionMoodData: AccordionMoodDataItem[], // For detailed entries
-    chartMoodDataForPdf: ChartMoodDataItem[], // For energy log, ensure this is sorted by timestamp if needed by PDF
-    moodDistributionData: MoodDistributionDataItem[], // For summary
+    filteredMoods: Mood[],
+    accordionMoodData: Mood[],
+    chartMoodDataForPdf: ChartMoodDataItem[],
+    moodDistributionData: MoodDistributionDataItem[],
     dateRange?: DateRange,
-    // setIsLoadingDataPDF: (loading: boolean) => void // Caller handles this
 ) => {
     if (filteredMoods.length === 0) {
         toast.info("No Data for PDF", { description: "There are no mood entries to include in the PDF." });
         return;
     }
-    // setIsLoadingDataPDF(true); // Caller should set this before calling
     toast.info("Generating PDF Report...", { description: "This may take a moment." });
 
     try {
@@ -194,10 +184,8 @@ export const generateDataPDF = async (
             pdf.setFontSize(10);
             pdf.setFont('helvetica', 'normal');
             pdf.setTextColor(bodyTextColor);
-            // Assuming chartMoodDataForPdf is already sorted by timestamp ASC as it was in original ReportPage
             chartMoodDataForPdf.forEach(mood => {
                 checkAndAddPage(lineHeightBody);
-                // Use formatDate utility for consistency
                 pdf.text(`•  ${formatDate(mood.timestamp, 'short')}: Energy Level ${mood.energy_level}/10`, margin + 5, currentY);
                 currentY += lineHeightBody;
             });
@@ -213,7 +201,6 @@ export const generateDataPDF = async (
         pdf.text("Detailed Mood Entries", margin, currentY);
         currentY += lineHeightHeader;
 
-        // Assuming accordionMoodData is sorted by timestamp DESC as it was in original ReportPage
         accordionMoodData.forEach((mood) => {
             currentY += itemSpacing * 1.5;
             checkAndAddPage(lineHeightSmall * 2 + lineHeightBody * 2 + paragraphSpacing);
@@ -275,11 +262,8 @@ export const generateDataPDF = async (
         toast.success("Report PDF Generated", { description: `Successfully exported report to ${fileName}.pdf` });
 
     } catch (error: any) {
-        console.error("Error generating data PDF:", error);
         toast.error("PDF Generation Failed", {
-            description: error?.message || "An unexpected error occurred. See console for details."
+            description: error?.message || "An unexpected error occurred."
         });
-    } finally {
-        // setIsLoadingDataPDF(false); // Caller handles this after the async operation completes
     }
 }; 

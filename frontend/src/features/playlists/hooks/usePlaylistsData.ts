@@ -1,13 +1,12 @@
 import { useState, useCallback, useEffect } from 'react';
 import { toast } from 'sonner';
-import { Playlist, Track } from '../../../types'; // Adjust path as needed
+import { Playlist, Track } from '../../../types';
 import { 
     getPlaylistHistory, 
     removeTrackFromPlaylistAPI, 
     findAndAddSpotifyTrackAPI,
-    replacePlaylistTrack, // Assuming this is the correct name for the feedback submission API
     reorderPlaylistTracks 
-} from '../../../services/api'; // Adjust path as needed
+} from '../../../services/api';
 
 export interface UsePlaylistsDataReturn {
     playlistHistory: Playlist[];
@@ -16,7 +15,6 @@ export interface UsePlaylistsDataReturn {
     fetchHistory: () => Promise<void>;
     handleRemoveTrack: (playlistId: string, trackId: string, trackTitle: string) => Promise<void>;
     
-    // Add Song specific states and handlers
     showAddSongDialog: boolean;
     openAddSongDialog: (playlistId: string) => void;
     closeAddSongDialog: () => void;
@@ -28,7 +26,6 @@ export interface UsePlaylistsDataReturn {
     handleFindAndAddSong: () => Promise<void>;
     currentPlaylistForAdding: string | null;
 
-    // Reorder specific states and handlers
     reorderModeActive: string | null;
     playlistTracksBeingReordered: Track[] | null;
     handleToggleReorderMode: (playlistId: string) => void;
@@ -36,7 +33,6 @@ export interface UsePlaylistsDataReturn {
     handleSaveReorderedTracks: () => Promise<void>;
     cancelReorder: (playlistId: string) => void;
 
-    // Feedback related updates (integrated into this hook)
     handleTrackReplacementInHistory: (playlistId: string, trackId: string, updatedTrack: Track) => void;
 }
 
@@ -44,19 +40,14 @@ export const usePlaylistsData = (): UsePlaylistsDataReturn => {
     const [playlistHistory, setPlaylistHistory] = useState<Playlist[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-
-    // State for "Add Song" dialog
     const [showAddSongDialog, setShowAddSongDialog] = useState(false);
     const [currentPlaylistForAdding, setCurrentPlaylistForAdding] = useState<string | null>(null);
     const [addSongTitle, setAddSongTitle] = useState("");
     const [addSongArtist, setAddSongArtist] = useState("");
     const [isFindingSong, setIsFindingSong] = useState(false);
-
-    // State for Reordering
     const [reorderModeActive, setReorderModeActive] = useState<string | null>(null);
     const [playlistTracksBeingReordered, setPlaylistTracksBeingReordered] = useState<Track[] | null>(null);
     const [originalTracksForRevert, setOriginalTracksForRevert] = useState<Track[] | null>(null);
-
 
     const fetchHistory = useCallback(async () => {
         setIsLoading(true);
@@ -65,7 +56,6 @@ export const usePlaylistsData = (): UsePlaylistsDataReturn => {
             const history = await getPlaylistHistory();
             setPlaylistHistory(history);
         } catch (err: any) {
-            console.error("Failed to fetch playlist history:", err);
             const errorMessage = err.response?.data?.detail || err.message || "Please try again later.";
             toast.error("Failed to load playlist history", { description: errorMessage });
             setError(errorMessage);
@@ -96,7 +86,6 @@ export const usePlaylistsData = (): UsePlaylistsDataReturn => {
             );
             toast.success(`"${trackTitle}" removed successfully.`, { id: toastId });
         } catch (err: any) {
-            console.error("Failed to remove track:", err);
             toast.error(`Failed to remove "${trackTitle}"`, {
                 id: toastId,
                 description: err.message || "Please try again later."
@@ -143,9 +132,13 @@ export const usePlaylistsData = (): UsePlaylistsDataReturn => {
             toast.success(`"${newTrack.title}" by ${newTrack.artist} added successfully.`, { id: toastId });
             closeAddSongDialog();
         } catch (err: any) {
-            console.error("Failed to find and add track:", err);
-            toast.error(`Failed to add song: ${err.response?.data?.detail || err.message || "Please try again."}`, {
+            const errorMessage = err.response?.status === 404 
+                ? `Could not find "${addSongTitle}" by ${addSongArtist} on Spotify.`
+                : err.response?.data?.detail || err.message || "Please try again.";
+            
+            toast.error("Failed to add song", {
                 id: toastId,
+                description: errorMessage
             });
         } finally {
             setIsFindingSong(false);
@@ -160,7 +153,7 @@ export const usePlaylistsData = (): UsePlaylistsDataReturn => {
                         ...p,
                         tracks: p.tracks.map(t =>
                             String(t.id) === trackId ? updatedTrack : t
-                        ).sort((a,b) => a.order_in_playlist - b.order_in_playlist) // Ensure order is maintained
+                        ).sort((a,b) => a.order_in_playlist - b.order_in_playlist)
                     };
                 }
                 return p;
@@ -169,14 +162,12 @@ export const usePlaylistsData = (): UsePlaylistsDataReturn => {
     };
 
     const handleToggleReorderMode = (playlistId: string) => {
-        if (reorderModeActive === playlistId) { // Deactivating reorder mode for this playlist
-            // No need to revert here, cancellation or save will handle it.
+        if (reorderModeActive === playlistId) {
             setReorderModeActive(null);
             setPlaylistTracksBeingReordered(null);
             setOriginalTracksForRevert(null);
-        } else { // Activating reorder mode for a new playlist (or switching)
+        } else {
             if (reorderModeActive && playlistTracksBeingReordered && originalTracksForRevert) {
-                // If another playlist was being reordered, revert its changes before switching
                  setPlaylistHistory(currentHistory =>
                     currentHistory.map(p => {
                         if (String(p.id) === reorderModeActive) {
@@ -192,7 +183,7 @@ export const usePlaylistsData = (): UsePlaylistsDataReturn => {
                 const tracksCopy = JSON.parse(JSON.stringify(playlistToReorder.tracks));
                 setReorderModeActive(playlistId);
                 setPlaylistTracksBeingReordered(tracksCopy);
-                setOriginalTracksForRevert(tracksCopy); // Store the original state for potential revert
+                setOriginalTracksForRevert(tracksCopy);
             }
         }
     };
@@ -202,7 +193,6 @@ export const usePlaylistsData = (): UsePlaylistsDataReturn => {
             setPlaylistHistory(currentHistory =>
                 currentHistory.map(p => {
                     if (String(p.id) === playlistId) {
-                        // Revert to original tracks order
                         return { ...p, tracks: originalTracksForRevert.sort((a,b) => a.order_in_playlist - b.order_in_playlist) };
                     }
                     return p;
@@ -246,7 +236,6 @@ export const usePlaylistsData = (): UsePlaylistsDataReturn => {
         const orderedTrackIds = orderedTracks.map(t => String(t.id));
         const toastId = toast.loading("Updating playlist order...");
 
-        // Optimistically update UI
         setPlaylistHistory(currentHistory =>
             currentHistory.map(p => {
                 if (String(p.id) === playlistId) {
@@ -261,7 +250,7 @@ export const usePlaylistsData = (): UsePlaylistsDataReturn => {
             setPlaylistHistory(currentHistory =>
                 currentHistory.map(p => {
                     if (String(p.id) === playlistId) {
-                        return updatedPlaylistFromServer; // Use server response as source of truth
+                        return updatedPlaylistFromServer;
                     }
                     return p;
                 })
@@ -271,12 +260,10 @@ export const usePlaylistsData = (): UsePlaylistsDataReturn => {
             setPlaylistTracksBeingReordered(null);
             setOriginalTracksForRevert(null);
         } catch (err: any) {
-            console.error("Failed to update track order:", err);
             toast.error("Failed to update playlist order.", {
                 id: toastId,
                 description: err.message || "Please try again later."
             });
-            // Revert to original tracks if save fails
             if (originalTracksForRevert) {
                  setPlaylistHistory(currentHistory =>
                     currentHistory.map(p => {

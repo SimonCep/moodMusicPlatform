@@ -7,11 +7,11 @@ import { DateRange } from 'react-day-picker';
 import { format } from 'date-fns';
 import { cn } from "@/lib/utils";
 import { exportMoodsToCSV, generateDataPDF } from '@/services/reportGenerator';
-import { Mood } from '@/types'; // For filteredMoods type
+import { Mood } from '@/types';
+import { MoodCategoryName } from '@/data/moodConfig';
 
-// Data types from reportGenerator.ts for clarity (or import them if exported from there)
 interface MoodDistributionDataItem {
-    name: string; // Assuming MoodCategoryName or string
+    name: MoodCategoryName;
     value: number;
     fill?: string;
 }
@@ -48,35 +48,26 @@ const ReportActionsSection: React.FC<ReportActionsSectionProps> = ({
 }) => {
 
     const handleGeneratePDF = async () => {
-        if (filteredMoods.length === 0 && !isLoadingHistory) { // Check added from original component
-            // toast.info("No Data for PDF", { description: "There are no mood entries to include in the PDF." });
-            // This toast is now handled inside generateDataPDF itself.
+        if (filteredMoods.length === 0 && !isLoadingHistory) {
             return;
         }
         setIsLoadingDataPDF(true);
         try {
-            // The actual call to generateDataPDF needs the specific data structures it expects.
-            // The `useMoodReportData` hook provides chartMoodData, accordionMoodData, moodDistributionData.
-            // Ensure these match what generateDataPDF needs or adapt them.
             await generateDataPDF(
-                filteredMoods, // Used for initial check in generateDataPDF
+                filteredMoods,
                 accordionMoodData, 
-                chartMoodDataForPdf, // This needs to be `chartMoodData` from the hook, possibly adapting its structure if needed
+                chartMoodDataForPdf,
                 moodDistributionData, 
                 dateRange
             );
         } catch (error) {
-            // Error handling is done within generateDataPDF now, including toasts.
-            // console.error("Error in handleGeneratePDF:", error); // Optional: for additional client-side logging
         } finally {
             setIsLoadingDataPDF(false);
         }
     };
 
     const handleExportCSV = () => {
-        if (filteredMoods.length === 0 && !isLoadingHistory) { // Check added from original component
-            // toast.info("No Data to Export", { description: "There are no mood entries in the current view to export." });
-            // This toast is now handled inside exportMoodsToCSV itself.
+        if (filteredMoods.length === 0 && !isLoadingHistory) {
             return;
         }
         exportMoodsToCSV(filteredMoods, dateRange);
@@ -90,13 +81,13 @@ const ReportActionsSection: React.FC<ReportActionsSectionProps> = ({
                         id="date"
                         variant={"outline"}
                         className={cn(
-                            "w-full sm:w-[280px] justify-start text-left font-normal",
-                            "bg-background/50 hover:bg-background/70 text-card-foreground",
+                            "w-full sm:w-[280px] justify-start text-left font-normal cursor-pointer",
+                            "bg-background/50 hover:bg-background/70 text-card-foreground transition-all duration-300 hover:scale-105 border border-primary",
                             !dateRange && "text-muted-foreground/80"
                         )}
-                        disabled={isLoadingHistory} // Disable if history is loading
+                        disabled={isLoadingHistory}
                     >
-                        <CalendarDays className="mr-2 h-4 w-4" />
+                        <CalendarDays className="mr-2 h-4 w-4 transition-colors duration-300" />
                         {dateRange?.from ? (
                             dateRange.to ? (
                                 <>{format(dateRange.from, "LLL dd, y")} - {format(dateRange.to, "LLL dd, y")}</>
@@ -109,38 +100,76 @@ const ReportActionsSection: React.FC<ReportActionsSectionProps> = ({
                     </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0 bg-background/80 backdrop-blur-sm border-white/20" align="center">
-                    <Calendar initialFocus mode="range" defaultMonth={dateRange?.from} selected={dateRange} onSelect={setDateRange} numberOfMonths={2} />
+                    <Calendar 
+                        initialFocus 
+                        mode="range" 
+                        defaultMonth={dateRange?.from} 
+                        selected={dateRange} 
+                        onSelect={setDateRange} 
+                        numberOfMonths={2}
+                        className="
+                            [&_.rdp-day]:cursor-pointer 
+                            [&_.rdp-day]:transition-all 
+                            [&_.rdp-day]:duration-300 
+                            [&_.rdp-day:hover]:scale-110 
+                            [&_.rdp-day:hover]:bg-accent/50 
+                            [&_.rdp-day:hover]:rounded-md 
+                            [&_.rdp-day_button]:cursor-pointer 
+                            [&_.rdp-day_button]:transition-all 
+                            [&_.rdp-day_button]:duration-300
+                            [&_.rdp-day_button:hover]:bg-accent/80 
+                            [&_.rdp-day_button:hover]:text-accent-foreground 
+                            [&_.rdp-day_button:hover]:scale-110
+                            [&_.rdp-day_button:hover]:shadow-sm
+                            [&_.rdp-day_button:focus]:bg-accent/80 
+                            [&_.rdp-day_button:focus]:text-accent-foreground
+                            [&_.rdp-button]:cursor-pointer 
+                            [&_.rdp-button]:transition-all 
+                            [&_.rdp-button]:duration-300
+                            [&_.rdp-button:hover]:bg-accent/50 
+                            [&_.rdp-button:hover]:rounded-md
+                            [&_.rdp-nav_button]:cursor-pointer
+                            [&_.rdp-nav_button]:transition-all
+                            [&_.rdp-nav_button]:duration-300
+                            [&_.rdp-nav_button:hover]:bg-accent/50
+                            [&_.rdp-nav_button:hover]:rounded-md
+                            [&_.rdp-day_selected]:bg-primary
+                            [&_.rdp-day_selected]:text-primary-foreground
+                            [&_.rdp-day_selected]:hover:bg-primary/90
+                            [&_.rdp-day_selected]:hover:text-primary-foreground
+                        "
+                    />
                 </PopoverContent>
             </Popover>
             {dateRange && (
                 <Button 
                     variant="ghost" 
                     onClick={() => setDateRange(undefined)} 
-                    className="w-full sm:w-auto text-card-foreground/80 hover:text-card-foreground"
-                    disabled={isLoadingHistory} // Disable if history is loading
+                    className="w-full sm:w-auto text-card-foreground/80 hover:text-card-foreground cursor-pointer transition-all duration-300 hover:scale-105"
+                    disabled={isLoadingHistory}
                 >
                     Reset
                 </Button>
             )}
             <Button
                 variant="outline"
-                onClick={handleExportCSV} // Use wrapped handler
-                className="w-full sm:w-auto bg-background/50 hover:bg-background/70 text-card-foreground"
+                onClick={handleExportCSV}
+                className="w-full sm:w-auto bg-background/50 hover:bg-background/70 text-card-foreground cursor-pointer transition-all duration-300 hover:scale-105 border border-primary"
                 disabled={isLoadingHistory || isLoadingDataPDF || filteredMoods.length === 0}
             >
-                <Download className="mr-2 h-4 w-4" />
+                <Download className="mr-2 h-4 w-4 transition-colors duration-300" />
                 Download CSV
             </Button>
             <Button
                 variant="outline"
-                onClick={handleGeneratePDF} // Use wrapped handler
-                className="w-full sm:w-auto bg-background/50 hover:bg-background/70 text-card-foreground"
+                onClick={handleGeneratePDF}
+                className="w-full sm:w-auto bg-background/50 hover:bg-background/70 text-card-foreground cursor-pointer transition-all duration-300 hover:scale-105 border border-primary"
                 disabled={isLoadingHistory || isLoadingDataPDF || filteredMoods.length === 0}
             >
                 {isLoadingDataPDF ? (
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 ) : (
-                    <FileText className="mr-2 h-4 w-4" />
+                    <FileText className="mr-2 h-4 w-4 transition-colors duration-300" />
                 )}
                 Download Report
             </Button>

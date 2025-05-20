@@ -72,20 +72,22 @@ const DiscoveryPage: React.FC = () => {
           {playlists.map((playlist, playlistIndex) => (
             <Card key={playlist.id || playlistIndex} className="glass-card">
               <AccordionItem value={`playlist-${playlist.id || playlistIndex}`} className="border-b-0">
-                <AccordionTrigger className="p-6 hover:no-underline">
+                <AccordionTrigger className="p-6 hover:no-underline cursor-pointer transition-all duration-300 hover:scale-[1.01] group">
                   <div className="flex flex-col items-start text-left w-full">
                     <div className="flex justify-between w-full items-center">
-                        <CardTitle className="text-xl flex items-center">
-                            <Music2 className="mr-2 h-5 w-5 text-primary" /> 
-                            {playlist.name}
-                        </CardTitle>
-                        {isToday(playlist.last_refreshed_date) ? (
-                            <Badge variant="secondary" className="text-xs ml-2">Refreshed Today</Badge>
-                        ) : playlist.last_refreshed_date ? (
-                            <Badge variant="outline" className="text-xs ml-2">Last Refreshed: {playlist.last_refreshed_date}</Badge>
-                        ) : (
-                            <Badge variant="outline" className="text-xs ml-2">Awaiting Tracks</Badge>
-                        )}
+                        <div className="flex items-center gap-3">
+                            <CardTitle className="text-xl flex items-center group-hover:text-primary transition-colors">
+                                <Music2 className="mr-2 h-5 w-5 text-primary" /> 
+                                {playlist.name}
+                            </CardTitle>
+                            {isToday(playlist.last_refreshed_date) ? (
+                                <Badge variant="secondary" className="text-xs">Refreshed Today</Badge>
+                            ) : playlist.last_refreshed_date ? (
+                                <Badge variant="outline" className="text-xs">Last Refreshed: {playlist.last_refreshed_date}</Badge>
+                            ) : (
+                                <Badge variant="outline" className="text-xs">Awaiting Tracks</Badge>
+                            )}
+                        </div>
                     </div>
                     <CardDescription className="text-card-foreground/80 mt-1 text-sm">
                       {playlist.description}
@@ -110,15 +112,14 @@ const DiscoveryPage: React.FC = () => {
                             const trackIdFromBackend = track.id != null ? track.id : trackIndex; 
                             const trackKey = String(trackIdFromBackend);
                             const playlistKeyStr = String(playlist.id);
-
                             const currentTrackPreviewState = discoveryPreviewStates[playlistKeyStr]?.[trackKey] || { uri: null, loading: false };
                             const spotifyTrackIdToEmbed = getSpotifyTrackIdFromUri(currentTrackPreviewState.uri);
-                            
                             const isPreviewActive = activePreview?.playlistId === playlist.id && activePreview?.trackKey === trackKey;
-                            
                             return (
                               <React.Fragment key={trackKey}>
-                                <TableRow className="hover:bg-muted/20">
+                                <TableRow 
+                                  className="hover:bg-accent/10"
+                                >
                                   <TableCell className="font-medium">{trackIndex + 1}</TableCell>
                                   <TableCell>{track.title}</TableCell>
                                   <TableCell>{track.artist}</TableCell>
@@ -137,7 +138,7 @@ const DiscoveryPage: React.FC = () => {
                                         <Button
                                           variant="ghost"
                                           size="icon"
-                                          className="h-8 w-8"
+                                          className="h-8 w-8 cursor-pointer transition-all duration-300 hover:scale-110"
                                           onClick={() => handleTogglePreview(playlist.id, trackKey, spotifyTrackIdToEmbed)}
                                           title={isPreviewActive ? "Close Preview" : "Play Preview"}
                                         >
@@ -152,11 +153,11 @@ const DiscoveryPage: React.FC = () => {
                                       <Button
                                         variant="ghost"
                                         size="icon"
-                                        className="h-8 w-8"
+                                        className="h-8 w-8 cursor-pointer transition-all duration-300 hover:scale-110"
                                         onClick={() => handleLoadDiscoveryPreview(playlist.id, trackKey, track.title, track.artist)}
                                         title="Load Spotify Preview"
                                       >
-                                        <PlayCircle className="h-5 w-5 opacity-70 hover:opacity-100" />
+                                        <PlayCircle className="h-5 w-5 opacity-70 hover:opacity-100 transition-opacity" />
                                       </Button>
                                     )}
                                   </TableCell>

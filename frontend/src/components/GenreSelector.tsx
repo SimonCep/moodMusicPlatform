@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import CreatableSelect from 'react-select/creatable';
 import { Card, CardContent } from "./ui/card";
 
-// Define music genres
 const genreOptions = [
   { value: 'pop', label: 'Pop' },
   { value: 'rock', label: 'Rock' },
@@ -18,7 +17,6 @@ const genreOptions = [
   { value: 'indie', label: 'Indie' },
 ];
 
-// Updated styles with menuPortal
 const customStyles = {
   control: (base: any) => ({
     ...base,
@@ -51,10 +49,9 @@ const customStyles = {
         : 'white',
     color: state.isSelected ? 'white' : 'black'
   }),
-  // Add menuPortal styles
   menuPortal: (base: any) => ({
     ...base,
-    zIndex: 9999 // Very high z-index to ensure it's above everything
+    zIndex: 9999
   })
 };
 
@@ -64,10 +61,8 @@ interface GenreSelectorProps {
 }
 
 const GenreSelector: React.FC<GenreSelectorProps> = ({ selectedGenre, onGenreChange }) => {
-  // State to track if the component is mounted
   const [isMounted, setIsMounted] = useState(false);
   
-  // Set isMounted to true after component mounts
   useEffect(() => {
     setIsMounted(true);
     return () => setIsMounted(false);
@@ -107,9 +102,7 @@ const GenreSelector: React.FC<GenreSelectorProps> = ({ selectedGenre, onGenreCha
           isSearchable
           formatCreateLabel={(inputValue) => `Use "${inputValue}"`}
           aria-label="Music genre selector"
-          // Add menuPortalTarget to render dropdown in a portal
           menuPortalTarget={isMounted ? document.body : null}
-          // Ensure the menu is always open when clicked
           menuPlacement="auto"
         />
       </CardContent>

@@ -9,7 +9,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Camera, Loader2, AlertTriangle, CheckCircle } from 'lucide-react'; // Icons
+import { Camera, Loader2, AlertTriangle, CheckCircle } from 'lucide-react';
 
 interface FaceScanPopupProps {
   open: boolean;
@@ -17,36 +17,33 @@ interface FaceScanPopupProps {
   onEmotionDetected: (emotion: string) => void;
 }
 
-// Simplified capture steps for automatic capture
 type CaptureStep = 
-  | 'initial'          // Before anything starts
-  | 'starting_camera'  // Camera is being initialized
-  | 'waiting_for_face' // Camera is on, models loaded, waiting for a stable face
-  | 'auto_capturing'   // Face detected, about to capture
-  | 'analyzing'        // Image sent to backend
-  | 'error'            // An error occurred
-  | 'success';         // Emotion successfully detected
+  | 'initial'
+  | 'starting_camera'
+  | 'waiting_for_face'
+  | 'auto_capturing'
+  | 'analyzing' 
+  | 'error'  
+  | 'success'; 
 
 const STABLE_FACE_DETECTION_COUNT = 3;
-const IMAGE_BURST_COUNT = 3; // Number of images to capture in a burst
-const BURST_CAPTURE_DELAY_MS = 100; // Delay between burst captures
+const IMAGE_BURST_COUNT = 3;
+const BURST_CAPTURE_DELAY_MS = 100;
 
 const FaceScanPopup: React.FC<FaceScanPopupProps> = ({ open, onClose, onEmotionDetected }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
-  const consecutiveFaceDetectionsRef = useRef(0); // For stable detection
+  const consecutiveFaceDetectionsRef = useRef(0);
 
   const [isModelsLoaded, setIsModelsLoaded] = useState(false);
   const [videoStream, setVideoStream] = useState<MediaStream | null>(null);
   const [captureStep, setCaptureStep] = useState<CaptureStep>('initial');
   const [feedbackMessage, setFeedbackMessage] = useState("Loading models...");
   const [isLoadingApi, setIsLoadingApi] = useState(false);
-  // No need for capturedImages array, will capture one and send
 
-  const VITE_API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+  const VITE_API_URL = import.meta.env.VITE_API_URL || 'https://localhost:8000';
 
-  // Define callbacks first, ensuring dependencies are defined before dependents
   const stopDetectionInterval = useCallback(() => {
     if (intervalRef.current) {
       clearInterval(intervalRef.current);
@@ -55,7 +52,6 @@ const FaceScanPopup: React.FC<FaceScanPopupProps> = ({ open, onClose, onEmotionD
     consecutiveFaceDetectionsRef.current = 0;
   }, []);
   
-  // New function to call the OpenAI endpoint
   const sendImageToOpenAI = useCallback(async (image: string) => {
     setIsLoadingApi(true);
     setFeedbackMessage("Analyzing emotion...");
@@ -63,20 +59,19 @@ const FaceScanPopup: React.FC<FaceScanPopupProps> = ({ open, onClose, onEmotionD
       const response = await fetch(`${VITE_API_URL}/api/analyze-emotion-openai/`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ images: [image] }), // Backend expects an array with one image
+        body: JSON.stringify({ images: [image] }),
       });
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({ detail: "AI analysis failed" }));
-        throw new Error(errorData.detail || `HTTP error! status: ${response.status}`);
+        throw new Error(errorData.detail || `HTTPS error! status: ${response.status}`);
       }
       const data = await response.json();
       const description = data.description || "Analysis complete, but no description provided.";
-      setFeedbackMessage("AI Analysis Complete."); // Keep feedback short here
+      setFeedbackMessage("AI Analysis Complete.");
       setCaptureStep('success');
-      onEmotionDetected(description); // Pass the full description back
-      setTimeout(() => { onClose(); }, 2500); // Slightly longer timeout to read feedback
+      onEmotionDetected(description);
+      setTimeout(() => { onClose(); }, 2500);
     } catch (error: any) {
-      console.error("Error sending image to OpenAI backend:", error);
       setFeedbackMessage(error.message || "Failed to get AI analysis. Please try again.");
       setCaptureStep('error');
     } finally {
@@ -84,7 +79,6 @@ const FaceScanPopup: React.FC<FaceScanPopupProps> = ({ open, onClose, onEmotionD
     }
   }, [onEmotionDetected, onClose, VITE_API_URL]);
 
-  // Updated to call sendImageToOpenAI with the last image of the burst
   const handleAutoCaptureImageBurst = useCallback(async () => {
     if (captureStep !== 'waiting_for_face') return;
     if (!videoRef.current || !canvasRef.current) {
@@ -121,7 +115,6 @@ const FaceScanPopup: React.FC<FaceScanPopupProps> = ({ open, onClose, onEmotionD
                  await new Promise(resolve => setTimeout(resolve, BURST_CAPTURE_DELAY_MS));
             }
         } catch (captureError) {
-            console.error("Error during image capture burst:", captureError);
             setFeedbackMessage("Error capturing image. Please try again.");
             setCaptureStep('error');
             return; 
@@ -130,9 +123,8 @@ const FaceScanPopup: React.FC<FaceScanPopupProps> = ({ open, onClose, onEmotionD
 
     if (capturedImagesBurst.length === IMAGE_BURST_COUNT) {
         setCaptureStep('analyzing');
-        // Send only the LAST image from the burst to OpenAI
         const lastImage = capturedImagesBurst[capturedImagesBurst.length - 1];
-        await sendImageToOpenAI(lastImage); // Use the new function
+        await sendImageToOpenAI(lastImage);
     } else {
         setFeedbackMessage("Failed to capture required images.");
         setCaptureStep('error');
@@ -140,7 +132,6 @@ const FaceScanPopup: React.FC<FaceScanPopupProps> = ({ open, onClose, onEmotionD
 
   }, [stopDetectionInterval, captureStep, sendImageToOpenAI]);
 
-  // Updated detection interval to call the burst capture function
   const startDetectionInterval = useCallback(() => {
     if (!videoRef.current || !faceapi.nets.tinyFaceDetector.isLoaded || intervalRef.current) return;
     
@@ -180,7 +171,6 @@ const FaceScanPopup: React.FC<FaceScanPopupProps> = ({ open, onClose, onEmotionD
       const stream = await navigator.mediaDevices.getUserMedia({ video: { width: { ideal: 640 }, height: { ideal: 480 } } });
       setVideoStream(stream);
     } catch (err) {
-      console.error("Error accessing camera:", err);
       setFeedbackMessage("Camera access denied or no camera found. Please check permissions.");
       setCaptureStep('error');
     }
@@ -197,16 +187,13 @@ const FaceScanPopup: React.FC<FaceScanPopupProps> = ({ open, onClose, onEmotionD
     }
   }, [videoStream, stopDetectionInterval]);
 
-  // Effect for loading models (runs once)
   useEffect(() => {
     const loadModels = async () => {
       const MODEL_URL = '/models';
       try {
         await faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL);
         setIsModelsLoaded(true);
-        console.log("Face detection models loaded.");
       } catch (error) {
-        console.error("Error loading face detection models:", error);
         setFeedbackMessage("Error loading models. Please try again later.");
         setCaptureStep('error');
       }
@@ -214,24 +201,19 @@ const FaceScanPopup: React.FC<FaceScanPopupProps> = ({ open, onClose, onEmotionD
     loadModels();
   }, []);
 
-  // Effect to attach stream and play video
   useEffect(() => {
     if (videoRef.current && videoStream) {
-      console.log("Attaching stream and playing video...");
       videoRef.current.srcObject = videoStream;
       let attempts = 0;
       const tryPlay = () => {
           videoRef.current?.play()
             .then(() => {
-              console.log("Video play started successfully.");
               setCaptureStep('waiting_for_face');
               setFeedbackMessage("Please position your face in the center.");
             })
             .catch(err => {
               attempts++;
-              console.error(`Error playing video (attempt ${attempts}):`, err);
               if (err.name === 'AbortError' && attempts < 3) {
-                console.log("Retrying play...");
                 setTimeout(tryPlay, 100);
               } else if (err.name !== 'AbortError') { 
                   setFeedbackMessage("Could not start camera. Check permissions/browser.");
@@ -246,7 +228,6 @@ const FaceScanPopup: React.FC<FaceScanPopupProps> = ({ open, onClose, onEmotionD
     }
   }, [videoStream]);
 
-  // Main effect for managing component state based on props and internal steps
    useEffect(() => {
     if (open) {
       if (!isModelsLoaded) {
@@ -297,7 +278,7 @@ const FaceScanPopup: React.FC<FaceScanPopupProps> = ({ open, onClose, onEmotionD
           <DialogTitle className="flex items-center justify-center">
             <Camera className="mr-2 h-5 w-5" /> Face Scan
           </DialogTitle>
-          <DialogDescription className="text-card-foreground/80">
+          <DialogDescription className="text-card-foreground/80 text-center">
             {captureStep !== 'success' && captureStep !== 'analyzing' && captureStep !== 'error' && 
              `Position your face in the center of the frame.`}
           </DialogDescription>
@@ -342,9 +323,9 @@ const FaceScanPopup: React.FC<FaceScanPopupProps> = ({ open, onClose, onEmotionD
               type="button" 
               onClick={handleStartScanClick}
               disabled={!isModelsLoaded || isLoadingApi}
-              className="w-full sm:w-auto"
+              className="w-full sm:w-auto cursor-pointer transition-all duration-300 hover:scale-105 border border-primary bg-primary/90 hover:bg-primary"
             >
-              <Camera className="mr-2 h-4 w-4" /> Start Scan
+              <Camera className="mr-2 h-4 w-4" /> {isLoadingApi ? 'Loading...' : 'Start Scan'}
             </Button>
           )}
           {(captureStep !== 'initial' && captureStep !== 'success') && (
@@ -353,7 +334,7 @@ const FaceScanPopup: React.FC<FaceScanPopupProps> = ({ open, onClose, onEmotionD
               variant="outline" 
               onClick={handleCloseDialog} 
               disabled={isLoadingApi && captureStep === 'analyzing'}
-              className="w-full sm:w-auto"
+              className="w-full sm:w-auto cursor-pointer transition-all duration-300 hover:scale-105 border border-primary bg-card/80 hover:bg-card/60"
             >
               Cancel
             </Button>
@@ -363,10 +344,10 @@ const FaceScanPopup: React.FC<FaceScanPopupProps> = ({ open, onClose, onEmotionD
               type="button" 
               variant="outline" 
               onClick={handleCloseDialog}
-              className="w-full sm:w-auto"
+              className="w-full sm:w-auto cursor-pointer transition-all duration-300 hover:scale-105 border border-primary bg-card/80 hover:bg-card/60"
             >
-            Close
-          </Button>
+              Close
+            </Button>
            )}
         </DialogFooter>
       </DialogContent>

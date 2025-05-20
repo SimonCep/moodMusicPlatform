@@ -7,11 +7,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { useAuth } from '../context/AuthContext';
 import { toast } from 'sonner';
 
-interface LoginFormProps {
-  // Potentially add props if needed in the future, e.g., onLoginSuccess
-}
-
-const LoginForm: React.FC<LoginFormProps> = () => {
+const LoginForm = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const { login, isLoading } = useAuth();
@@ -21,7 +17,6 @@ const LoginForm: React.FC<LoginFormProps> = () => {
     try {
       await login({ username, password });
       toast.success("Login Successful!");
-      // Consider redirecting user here or calling a prop like onLoginSuccess
     } catch (err: any) {
       let errorMessage = 'Login failed. Please check your username and password.';
       const errorDetail = err.response?.data?.detail;
@@ -35,7 +30,6 @@ const LoginForm: React.FC<LoginFormProps> = () => {
           errorMessage = err.message;
       }
       toast.error("Login Failed", { description: errorMessage });
-      console.error("Login failed API details:", err.response?.data || err);
     }
   };
 
@@ -77,13 +71,27 @@ const LoginForm: React.FC<LoginFormProps> = () => {
           </div>
         </CardContent>
         <CardFooter className="flex flex-col space-y-2">
-            <Button type="submit" className="w-full" disabled={isLoading}>
+            <Button 
+              type="submit" 
+              variant="outline"
+              className="w-full text-primary border-primary hover:bg-primary/10 cursor-pointer transform transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] hover:shadow-md" 
+              disabled={isLoading}
+            >
               {isLoading ? 'Logging in...' : 'Log In'}
-              </Button>
-            <Button variant="outline" className="w-full" asChild>
+            </Button>
+            <Button 
+              variant="outline" 
+              className="w-full border-primary/20 text-primary hover:bg-primary/10 cursor-pointer transform transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] hover:shadow-md" 
+              asChild
+            >
                  <Link to="/reset-password">Forgot Password?</Link>
             </Button>
-            <Button variant="link" size="sm" asChild>
+            <Button 
+              variant="link" 
+              size="sm" 
+              className="text-primary hover:text-primary/80 cursor-pointer transform transition-all duration-300 hover:scale-[1.02]" 
+              asChild
+            >
                  <Link to="/register">Don't have an account? Register</Link>
             </Button>
         </CardFooter>

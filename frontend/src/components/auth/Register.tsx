@@ -15,20 +15,17 @@ const Register: React.FC = () => {
         e.preventDefault();
         setError('');
     
-        // Basic client-side validation (optional but good UX)
         if (password.length < 8) {
             setError("Password must be at least 8 characters long.");
             toast.error("Password must be at least 8 characters long.");
             return;
         }
-        // Add more client-side checks if desired (e.g., email regex)
         
         try {
             await register({ username, email, password });
             toast.success("Registration successful! Please log in.");
             navigate('/login', { replace: true });
         } catch (err: any) {
-            // Default message if parsing fails
             let errorMessage = 'Registration failed. Please check your input and try again.';
             const errorData = err.response?.data;
             const statusCode = err.response?.status;
@@ -49,12 +46,11 @@ const Register: React.FC = () => {
                 }
 
                 if (fieldErrors.length > 0) {
-                    errorMessage = fieldErrors.join(' \n '); // Join errors with newline for the state
+                    errorMessage = fieldErrors.join(' \n ');
                 } else if (statusCode === 400 && typeof errorData === 'object') {
-                    // If it's a 400 but no specific fields matched, show generic validation error
                     errorMessage = "Invalid data provided. Please check the form fields.";
                 } else if (typeof errorData === 'string') {
-                    errorMessage = errorData; // Generic string error
+                    errorMessage = errorData;
                 } else if (err.response?.statusText) {
                     errorMessage = `Error: ${err.response.statusText}`;
                 }
@@ -66,7 +62,6 @@ const Register: React.FC = () => {
             toast.error("Registration Failed", { 
                 description: errorMessage.replace(/\n/g, '; ') 
             }); 
-            console.error("Registration failed API details:", errorData || err.message);
         }
     };
 

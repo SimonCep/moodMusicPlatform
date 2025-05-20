@@ -7,15 +7,15 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { LineChart as LineChartIcon } from 'lucide-react';
 
 interface ChartDisplayDataItem {
-    name: string; // Formatted date (short)
+    name: string;
     energyLevel: number;
-    fullDate: string; // Formatted date (long) for tooltip
-    moodText: string; // For tooltip
+    fullDate: string;
+    moodText: string;
 }
 
 interface EnergyLevelsSectionProps {
     chartDisplayData: ChartDisplayDataItem[];
-    hasEnoughDataForChart: boolean; // Derived from chartMoodData.length >= 2
+    hasEnoughDataForChart: boolean;
 }
 
 const EnergyLevelsSection: React.FC<EnergyLevelsSectionProps> = ({ 
@@ -43,8 +43,21 @@ const EnergyLevelsSection: React.FC<EnergyLevelsSectionProps> = ({
             <ResponsiveContainer width="100%" height={350}>
                 <LineChart data={chartDisplayData} margin={{ top: 5, right: 20, left: 20, bottom: 5 }}>
                     <CartesianGrid strokeDasharray="3 3" strokeOpacity={0.3} />
-                    <XAxis dataKey="name" tick={{ fill: 'hsl(var(--card-foreground))' }} stroke='hsl(var(--border))' />
-                    <YAxis domain={[0, 10]} tick={{ fill: 'hsl(var(--card-foreground))' }} stroke='hsl(var(--border))' />
+                    <XAxis 
+                        dataKey="name" 
+                        stroke="hsl(var(--card-foreground))" 
+                        fontSize={12}
+                        tickLine={false}
+                        axisLine={false}
+                        dy={10}
+                    />
+                    <YAxis 
+                        stroke="hsl(var(--card-foreground))" 
+                        fontSize={12}
+                        tickLine={false}
+                        axisLine={false}
+                        dx={-10}
+                    />
                     <Tooltip 
                         contentStyle={{ 
                             backgroundColor: 'hsl(var(--popover))', 
@@ -54,6 +67,26 @@ const EnergyLevelsSection: React.FC<EnergyLevelsSectionProps> = ({
                         }}
                         formatter={(value: number, _name: string, props: any) => [`${value}/10 - ${props.payload.moodText}`, `Energy on ${props.payload.fullDate}`]}
                     />
+                    <Line
+                        type="monotone"
+                        dataKey="energyLevel"
+                        name="Energy Level"
+                        stroke="hsl(var(--primary))"
+                        strokeWidth={2}
+                        dot={{ 
+                            r: 4, 
+                            fill: "hsl(var(--primary))", 
+                            className: "cursor-pointer transition-all duration-300 hover:r-6" 
+                        }}
+                        activeDot={{ 
+                            r: 6, 
+                            className: "cursor-pointer transition-all duration-300" 
+                        }}
+                        isAnimationActive={true}
+                        animationBegin={0}
+                        animationDuration={800}
+                        animationEasing="ease-out"
+                    />
                     <Legend 
                         verticalAlign="bottom"
                         align="center"
@@ -62,17 +95,9 @@ const EnergyLevelsSection: React.FC<EnergyLevelsSectionProps> = ({
                             display: 'flex', 
                             justifyContent: 'center', 
                             width: '100%', 
-                            textAlign: 'center' 
+                            textAlign: 'center',
+                            paddingTop: '10px'
                         }}
-                    />
-                    <Line 
-                        type="monotone" 
-                        dataKey="energyLevel" 
-                        name="Energy Level" 
-                        strokeWidth={2} 
-                        stroke="hsl(var(--primary))" 
-                        activeDot={{ r: 6 }} 
-                        isAnimationActive={false} // Consider true for subtle animation
                     />
                 </LineChart>
             </ResponsiveContainer>
