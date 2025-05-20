@@ -50,7 +50,7 @@ CORS_ALLOWED_ORIGINS=https://localhost:3000
 OPENAI_API_KEY=your_openai_api_key
 
 # Email Configuration
-EMAIL_HOST_USER=moodmusicplatform@gmail.com
+EMAIL_HOST_USER=your_email
 EMAIL_HOST_PASSWORD=your_app_specific_password
 
 # Frontend URL
@@ -100,7 +100,6 @@ The development server uses SSL certificates for HTTPS. The certificates should 
 - `python manage.py runserver` - Start development server
 - `python manage.py migrate` - Run database migrations
 - `python manage.py createsuperuser` - Create admin user
-- `python manage.py test` - Run tests
 - `python manage.py collectstatic` - Collect static files
 
 ## Production Deployment
