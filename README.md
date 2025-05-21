@@ -134,12 +134,17 @@ CORS_ALLOWED_ORIGINS=https://localhost:3000
 OPENAI_API_KEY=your_openai_api_key
 ```
 
-3. Start the development environment:
+3. Generate the certificates for HTTPS communication
+```bash
+openssl req -x509 -newkey rsa:4096 -keyout backend/certs/key.pem -out backend/certs/cert.pem -sha256 -days 365 nodes -subj "/CN=localhost"
+```
+
+4. Start the development environment:
 ```bash
 docker-compose up --build
 ```
 
-4. Access the applications:
+5. Access the applications:
 - Frontend: https://localhost:3000
 - Backend API: https://localhost:8000
 
