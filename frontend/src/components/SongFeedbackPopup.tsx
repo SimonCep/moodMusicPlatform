@@ -92,10 +92,10 @@ const SongFeedbackPopup: React.FC<SongFeedbackPopupProps> = ({
           </div>
         </div>
         <DialogFooter>
-            <Button type="button" onClick={handleSubmit} disabled={rating === 0}>
+            <Button type="button" onClick={handleSubmit} disabled={rating === 0} className="cursor-pointer hover:scale-105 transition-transform border border-input">
                 Submit Feedback
             </Button>
-            <Button type="button" variant="outline" onClick={onCancel}>Cancel</Button>
+            <Button type="button" variant="outline" onClick={onCancel} className="cursor-pointer hover:scale-105 transition-transform">Cancel</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
