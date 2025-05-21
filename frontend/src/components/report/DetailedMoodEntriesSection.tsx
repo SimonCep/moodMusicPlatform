@@ -113,7 +113,7 @@ const DetailedMoodEntriesSection: React.FC<DetailedMoodEntriesSectionProps> = ({
                                     </Alert>
                                 )}
                                 {selectedMoodIdForAdvice === mood.id && advice && !isLoadingAdvice && !errorAdvice && (
-                                    <div className="mt-3 space-y-2 rounded-md border bg-accent/30 p-4">
+                                    <div className="mt-3 space-y-2 rounded-md border bg-card p-4">
                                         <h4 className="font-semibold text-accent-foreground">Personalized Recommendations:</h4>
                                         <ul className="list-disc pl-5 space-y-1 text-sm text-accent-foreground/90">
                                             {advice.map((rec, index) => (
